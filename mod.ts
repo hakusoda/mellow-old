@@ -1,4 +1,5 @@
 import { camelize } from 'camelize';
+import { getFixedT } from 'i18next';
 import { json, serve, validateRequest } from 'sift';
 import { Interaction, verifySignature, InteractionTypes, InteractionResponseTypes } from 'discordeno';
 
@@ -69,7 +70,7 @@ async function main(request: Request) {
 				}
 			});
 
-		const result = await command.execute(payload);
+		const result = await command.execute(payload, getFixedT(payload.locale, 'command'));
 		if (!isInteractionResponse(result))
 			return json({
 				data: result,

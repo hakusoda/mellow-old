@@ -1,15 +1,18 @@
+import i18n from 'i18next';
 import { Interaction, InteractionResponse, InteractionCallbackData, ApplicationCommandOption } from 'discordeno';
 import { upsertGlobalApplicationCommands } from 'discordeno';
 
 import { ping } from './general/mod.ts';
+import { testInfo } from './general/testinfo.ts';
 import { PermissionLevels } from '../util/permissions.ts';
 export const commands: Record<string, Command> = {
-	ping
+	ping,
+	testInfo
 }
 export interface Command {
 	guild?: boolean
 	global?: boolean
-	execute: (payload: Interaction) => InteractionResponse | InteractionCallbackData | Promise<InteractionResponse | InteractionCallbackData>
+	execute: (payload: Interaction, t: typeof i18n.t) => InteractionResponse | InteractionCallbackData | Promise<InteractionResponse | InteractionCallbackData>
 	enabled?: boolean
 	options?: ApplicationCommandOption[]
 	advanced?: boolean

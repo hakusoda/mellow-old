@@ -1,11 +1,9 @@
-import { t } from 'i18next';
-
 import type { Command } from '../mod.ts';
 export const ping: Command = {
 	global: true,
-	execute: () => {
+	execute: (_, t) => {
 		return {
-			content: t('command:ping.content')
-		}
+			content: t('ping.content')
+		};
 	}
 }
