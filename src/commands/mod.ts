@@ -9,12 +9,8 @@ export const commands: Record<string, Command> = {
 	roll,
 	testinfo
 }
-export enum CommandType {
-	Global
-}
 export type CommandResponse = InteractionResponse | InteractionCallbackData | Promise<InteractionResponse | InteractionCallbackData>
 export interface Command {
-	type?: CommandType
 	execute: (payload: Interaction) => Response | CommandResponse
 	options?: ApplicationCommandOption[]
 	description?: string
@@ -23,7 +19,6 @@ export interface Command {
 
 export function command(execute: Command["execute"], options?: Command) {
 	return {
-		type: CommandType.Global,
 		execute,
 		...options
 	};
@@ -38,7 +33,7 @@ export async function processCommand(command: Command, payload: Interaction) {
 
 import bot from '../bot.ts';
 export async function registerGlobalCommands() {
-	await upsertGlobalApplicationCommands(bot, Object.entries(commands).filter(c => c[1].type === CommandType.Global).map(([name, cmd]) => ({
+	await upsertGlobalApplicationCommands(bot, Object.entries(commands).map(([name, cmd]) => ({
 		name,
 		description: cmd.description ?? 'this description does not exist 🦑'
 	})));
