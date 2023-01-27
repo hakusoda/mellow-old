@@ -1,9 +1,3 @@
-import type { Command } from '../mod.ts';
-export default {
-	global: true,
-	execute: ({ locale }) => {
-		return {
-			content: `locale: ${locale}`
-		};
-	}
-} satisfies Command
+import { text } from '../response.ts';
+import { command } from '../mod.ts';
+export default command(({ locale }) => text(`locale: ${locale}`));

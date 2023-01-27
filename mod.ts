@@ -1,12 +1,11 @@
 import { camelize } from 'camelize';
-import { getFixedT } from 'i18next';
 import { json, serve, validateRequest } from 'sift';
 import { Interaction, verifySignature, InteractionTypes, InteractionResponseTypes } from 'discordeno';
 
 import './src/localization/mod.ts';
 import { hasPermissionLevel } from './src/util/permissions.ts';
 import { isInteractionResponse } from './src/util/mod.ts';
-import { commands, registerGlobalCommands } from './src/commands/mod.ts';
+import { commands, processCommand, registerGlobalCommands } from './src/commands/mod.ts';
 
 serve({ '/': main });
 
@@ -70,7 +69,7 @@ async function main(request: Request) {
 				}
 			});
 
-		const result = await command.execute(payload, getFixedT(payload.locale, 'command'));
+		const result = await processCommand(command, payload);
 		if (!isInteractionResponse(result))
 			return json({
 				data: result,
