@@ -1,3 +1,5 @@
 {
-	"ping.content": "ポン！"
+	"ping.content": "ポン！",
+
+	"roll.content": "あなたは{{0}}を出しました！"
 }

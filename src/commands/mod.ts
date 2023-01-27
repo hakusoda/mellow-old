@@ -2,10 +2,11 @@ import { upsertGlobalApplicationCommands } from 'discordeno';
 import { Interaction, InteractionResponse, InteractionCallbackData, ApplicationCommandOption } from 'discordeno';
 
 import type { Response } from './response.ts';
-import { ping, testinfo } from './general/mod.ts';
+import { ping, roll, testinfo } from './general/mod.ts';
 import { PermissionLevels } from '../util/permissions.ts';
 export const commands: Record<string, Command> = {
 	ping,
+	roll,
 	testinfo
 }
 export enum CommandType {

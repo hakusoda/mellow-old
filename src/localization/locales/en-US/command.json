@@ -1,3 +1,5 @@
 {
-	"ping.content": "pong!"
+	"ping.content": "pong!",
+
+	"roll.content": "you rolled a {{0}}!"
 }
