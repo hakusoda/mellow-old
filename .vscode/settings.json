@@ -1,0 +1,9 @@
+{
+	"deno.lint": true,
+	"deno.enable": true,
+	"deno.config": "./deno.jsonc",
+	"deno.importMap": "./import_map.json",
+	"i18n-ally.localesPaths": [
+		"src/localization/locales"
+	]
+}

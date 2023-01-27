@@ -1,0 +1,10 @@
+{
+	"tasks": {
+		"run": "deno run --allow-net --allow-env --allow-write --allow-read --watch mod.ts",
+		"compile": "deno compile -A -r --import-map src/import_map.jsonc --config deno.jsonc --output build/server mod.ts"
+	},
+	"importMap": "./import_map.json",
+	"compilerOptions": {
+		"strict": true
+	}
+}

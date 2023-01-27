@@ -1,0 +1,11 @@
+{
+	"imports": {
+		"sift": "https://deno.land/x/sift@0.6.0/mod.ts",
+		"i18next": "https://deno.land/x/i18next@v22.4.8/index.js",
+		"camelize": "https://deno.land/x/camelize@2.0.0/mod.ts",
+		"encoding/": "https://deno.land/std@0.156.0/encoding/",
+		"discordeno": "https://deno.land/x/discordeno@17.0.1/mod.ts",
+		"cache-plugin": "https://deno.land/x/discordeno_cache_plugin@0.0.21/mod.ts",
+		"permission-plugin": "https://deno.land/x/discordeno_permissions_plugin@0.0.15/mod.ts"
+	}
+}
