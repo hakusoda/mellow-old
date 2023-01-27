@@ -2,6 +2,7 @@ import { camelize } from 'camelize';
 import { json, serve, validateRequest } from 'sift';
 import { Interaction, verifySignature, InteractionTypes, InteractionResponseTypes } from 'discordeno';
 
+import './src/localization/mod.ts';
 import { hasPermissionLevel } from './src/util/permissions.ts';
 import { isInteractionResponse } from './src/util/mod.ts';
 import { commands, registerGlobalCommands } from './src/commands/mod.ts';
