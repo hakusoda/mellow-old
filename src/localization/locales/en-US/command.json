@@ -1,5 +1,13 @@
 {
+	"ping": "ping",
+	"ping.summary": "ping pong",
 	"ping.content": "pong!",
 
-	"roll.content": "you rolled a {{0}}!"
+	"roll": "roll",
+	"roll.summary": "roll a number between 1 and 6!",
+	"roll.content": "you rolled a {{0}}!",
+
+	"placeholder.summary": "this description does not exist 🦑",
+
+	"common.error.no_permission": "you do not have permission"
 }

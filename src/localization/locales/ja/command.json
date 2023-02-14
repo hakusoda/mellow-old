@@ -1,5 +1,11 @@
 {
+	"ping": "ピング",
+	"ping.summary": "卓球",
 	"ping.content": "ポン！",
 
-	"roll.content": "あなたは{{0}}を出しました！"
+	"roll": "ロール",
+	"roll.summary": "1から6の間の数字を転がしてください！",
+	"roll.content": "あなたは{{0}}を出しました！",
+
+	"placeholder.summary": "この説明は存在しません🦑"
 }

@@ -1,9 +1,11 @@
-import { upsertGlobalApplicationCommands } from 'discordeno';
+import { getFixedT } from 'i18next';
 import { Interaction, InteractionResponse, InteractionCallbackData, ApplicationCommandOption } from 'discordeno';
 
+import { LOCALES } from '../localization/mod.ts';
 import type { Response } from './response.ts';
-import { ping, roll, testinfo } from './general/mod.ts';
 import { PermissionLevels } from '../util/permissions.ts';
+import { ping, roll, testinfo } from './general/mod.ts';
+import { overwriteGlobalCommands } from '../discord.ts';
 export const commands: Record<string, Command> = {
 	ping,
 	roll,
@@ -31,10 +33,11 @@ export async function processCommand(command: Command, payload: Interaction) {
 	return response;
 }
 
-import bot from '../bot.ts';
-export async function registerGlobalCommands() {
-	await upsertGlobalApplicationCommands(bot, Object.entries(commands).map(([name, cmd]) => ({
+export function registerGlobalCommands() {
+	return overwriteGlobalCommands(Object.entries(commands).map(([name, cmd]) => ({
 		name,
-		description: cmd.description ?? 'this description does not exist 🦑'
+		description: cmd.description ?? 'this description does not exist 🦑',
+		name_localizations: Object.fromEntries(LOCALES.map(lng => [lng, getFixedT(lng, 'command')(name)])),
+		description_localizations: Object.fromEntries(LOCALES.map(lng => [lng, getFixedT(lng, 'command')([name + '.summary', 'placeholder.summary'])]))
 	})));
 }

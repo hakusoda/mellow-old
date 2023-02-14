@@ -2,7 +2,7 @@ import { Interaction } from 'discordeno';
 
 import type { Command } from '../commands/mod.ts';
 import { validatePermissions } from 'permission-plugin';
-export async function hasPermissionLevel(command: Command, payload: Interaction) {
+export async function hasPermission(command: Command, payload: Interaction) {
 	if (!command.permissionLevels)
 		return true;
 	if (typeof command.permissionLevels === 'function')
@@ -11,7 +11,6 @@ export async function hasPermissionLevel(command: Command, payload: Interaction)
 	for (const permlevel of command.permissionLevels)
 		if (await PermissionLevelHandlers[permlevel](payload, command))
 			return true;
-
 	return false;
 }
 
