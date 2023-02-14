@@ -9,5 +9,6 @@
 
 	"placeholder.summary": "this description does not exist 🦑",
 
-	"common.error.no_permission": "you do not have permission"
+	"error.no_permission": "you are not cool enough 🦑",
+	"error.invalid_request": "invalid request received from discord"
 }

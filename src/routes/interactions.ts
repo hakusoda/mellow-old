@@ -1,24 +1,23 @@
-import { camelize } from 'camelize';
-import { json, validateRequest } from 'sift';
+import { validateRequest } from 'sift';
 import { Interaction, verifySignature, InteractionTypes, InteractionResponseTypes } from 'discordeno';
 
+import { text } from '../commands/response.ts';
+import { json, error } from './mod.ts';
 import { hasPermission } from '../util/permissions.ts';
 import { isInteractionResponse } from '../util/mod.ts';
 import { commands, processCommand } from '../commands/mod.ts';
 export default async (request: Request) => {
-	const { error } = await validateRequest(request, {
+	const { error: validationError } = await validateRequest(request, {
 		POST: {
 			headers: ['X-Signature-Ed25519', 'X-Signature-Timestamp'],
 		}
 	});
-	if (error)
-		return json({ error: error.message }, { status: error.status });
+	if (validationError)
+		return error(validationError.message, validationError.status);
 
 	const publicKey = Deno.env.get('DISCORD_PUBLIC_KEY');
 	if (!publicKey)
-		return json({
-			error: 'missing public key',
-		});
+		return error('missing public key', 500);
 
 	const signature = request.headers.get('X-Signature-Ed25519')!;
 	const timestamp = request.headers.get('X-Signature-Timestamp')!;
@@ -30,50 +29,42 @@ export default async (request: Request) => {
 		timestamp
 	});
 	if (!isValid)
-		return json({ error: 'Invalid request; could not verify the request' }, {
-			status: 401,
-		});
+		return json({ error: 'invalid request signature' }, 401);
 
-	const payload = camelize<Interaction>(JSON.parse(body)) as Interaction;
-	if (payload.type === InteractionTypes.Ping)
-		return json({
-			type: InteractionResponseTypes.Pong,
-		});
-	else if (payload.type === InteractionTypes.ApplicationCommand) {
-		if (!payload.data?.name)
-			return json({
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					content: 'command name not provided 👎'
-				}
-			});
+	const payload: Interaction = JSON.parse(body);
+	switch (payload.type) {
+		case InteractionTypes.Ping:
+			return json({ type: InteractionResponseTypes.Pong });
+		case InteractionTypes.ApplicationCommand: {
+			if (!payload.data?.name)
+				return json({
+					data: text('error.invalid_request')(payload),
+					type: InteractionResponseTypes.ChannelMessageWithSource
+				});
 
-		const command = commands[payload.data.name];
-		if (!command)
-			return json({
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					content: 'command not found 👎'
-				}
-			});
+			const command = commands[payload.data.name];
+			if (!command)
+				return json({
+					data: text('error.invalid_request')(payload),
+					type: InteractionResponseTypes.ChannelMessageWithSource
+				});
 
-		if (!await hasPermission(command, payload))
-			return json({
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					content: 'you are not cool enough 🦑'
-				}
-			});
+			if (!await hasPermission(command, payload))
+				return json({
+					data: text('error.no_permission')(payload),
+					type: InteractionResponseTypes.ChannelMessageWithSource
+				});
 
-		const result = await processCommand(command, payload);
-		if (!isInteractionResponse(result))
-			return json({
-				data: result,
-				type: InteractionResponseTypes.ChannelMessageWithSource
-			});
+			const data = await processCommand(command, payload);
+			if (!isInteractionResponse(data))
+				return json({
+					data,
+					type: InteractionResponseTypes.ChannelMessageWithSource
+				});
 
-		return json(result);
+			return json(data);
+		}
 	}
 
-	return json({ error: 'Bad request' }, { status: 400 });
+	return error('bad request', 400);
 }

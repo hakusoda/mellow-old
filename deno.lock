@@ -27,7 +27,6 @@
     "https://deno.land/std@0.154.0/async/tee.ts": "d27680d911816fcb3d231e16d690e7588079e66a9b2e5ce8cc354db94fdce95f",
     "https://deno.land/std@0.154.0/http/http_status.ts": "897575a7d6bc2b9123f6a38ecbc0f03d95a532c5d92029315dc9f508e12526b8",
     "https://deno.land/std@0.154.0/http/server.ts": "e2e16f0b124ffef022ad04797d4250d6e4fc0d9579780999091949b17789dd1a",
-    "https://deno.land/x/camelize@2.0.0/mod.ts": "dd2c37a0cc90bc8c1ae4671e9ce48aefa5ec075777ed2cec6a8a4afce407a24f",
     "https://deno.land/x/discordeno@13.0.0-rc18/mod.ts": "5ee3d974207b1f56f6d4889902f0a2fbe6e3a51d19f37d49814a3bc20eec860b",
     "https://deno.land/x/discordeno@13.0.0-rc18/src/bot.ts": "a537484aa3871a7ff27bad90f673eecff40d29ba43e0dea07ccb8c4edb4dfe96",
     "https://deno.land/x/discordeno@13.0.0-rc18/src/handlers/channels/CHANNEL_CREATE.ts": "f7b276988f163be5b202701d154cded9b73bd085c69dc60f5494bfc4f977e43e",
