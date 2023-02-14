@@ -1,26 +1,18 @@
 // deno-lint-ignore-file ban-types
+import { embed2 } from '../../helpers/interaction.ts';
 import { command } from '../mod.ts';
-export default command(async () => {
+import { author, attachment } from '../../helpers/embed.ts';
+export default command(async ({ t }) => {
 	let id = Math.floor(Math.random() * 1279) + 1;
 	if (id > 1008)
 		id += 8992;
 
 	const data: Pokemon = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`).then(r => r.json());
-	return {
-		embeds: [{
-			title: data.name,
-			description: `it is a ${data.types[0].type.name} type with ${data.abilities.length} abilities`,
-			author: {
-				name: `number ${id}`
-			},
-			image: {
-				url: data.sprites.other['official-artwork'].front_default
-			},
-			thumbnail: {
-				url: data.sprites.front_default
-			}
-		}]
-	};
+	return embed2(data.name, t('pokemon.embed.summary', [data]), {
+		image: attachment(data.sprites.other['official-artwork'].front_default),
+		author: author(t('pokemon.embed.id', [data])),
+		thumbnail: attachment(data.sprites.front_default)
+	});
 });
 
 export interface Pokemon {

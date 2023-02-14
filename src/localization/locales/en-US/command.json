@@ -8,6 +8,9 @@
 	"roll.content": "you rolled a {{0}}!",
 
 	"pokemon": "pokémon",
+	"pokemon.summary": "provides you with a random Pokémon!",
+	"pokemon.embed.id": "number {{0.id}}",
+	"pokemon.embed.summary": "it is a {{0.types.0.type.name}} type with {{0.abilities.length}} abilities",
 
 	"placeholder.summary": "this description does not exist 🦑",
 

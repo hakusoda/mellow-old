@@ -13,8 +13,12 @@ export const commands: Record<string, Command> = {
 	testinfo
 }
 export type CommandResponse = InteractionResponse | InteractionCallbackData | Promise<InteractionResponse | InteractionCallbackData>
+export interface CommandExecutePayload extends Interaction {
+	// deno-lint-ignore no-explicit-any
+	t: (keys: string | string[], ...args: any[]) => string
+}
 export interface Command {
-	execute: (payload: Interaction) => Response | CommandResponse
+	execute: (payload: CommandExecutePayload) => Response | CommandResponse
 	options?: ApplicationCommandOption[]
 	description?: string
 	permissionLevels?: ((payload: Interaction, command: Command) => boolean | Promise<boolean>) | (keyof typeof PermissionLevels)[]
@@ -28,7 +32,10 @@ export function command(execute: Command["execute"], options?: Command) {
 }
 
 export async function processCommand(command: Command, payload: Interaction) {
-	const response = await command.execute(payload);
+	const response = await command.execute({
+		t: getFixedT(payload.locale, 'command'),
+		...payload
+	});
 	if (typeof response === 'function')
 		return response(payload);
 	return response;
