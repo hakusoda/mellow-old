@@ -7,6 +7,8 @@
 	"roll.summary": "roll a number between 1 and 6!",
 	"roll.content": "you rolled a {{0}}!",
 
+	"pokemon": "pokémon",
+
 	"placeholder.summary": "this description does not exist 🦑",
 
 	"error.no_permission": "you are not cool enough 🦑",

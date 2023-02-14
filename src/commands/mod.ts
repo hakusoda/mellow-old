@@ -4,11 +4,12 @@ import { Interaction, InteractionResponse, InteractionCallbackData, ApplicationC
 import { LOCALES } from '../localization/mod.ts';
 import type { Response } from './response.ts';
 import { PermissionLevels } from '../util/permissions.ts';
-import { ping, roll, testinfo } from './general/mod.ts';
 import { overwriteGlobalCommands } from '../discord.ts';
+import { ping, roll, pokemon, testinfo } from './general/mod.ts';
 export const commands: Record<string, Command> = {
 	ping,
 	roll,
+	pokemon,
 	testinfo
 }
 export type CommandResponse = InteractionResponse | InteractionCallbackData | Promise<InteractionResponse | InteractionCallbackData>
