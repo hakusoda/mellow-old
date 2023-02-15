@@ -7,5 +7,7 @@
 	"roll.summary": "1から6の間の数字を転がしてください！",
 	"roll.content": "あなたは{{0}}を出しました！",
 
+	"pokemon.embed.id": "ナンバー{{0.id}}",
+
 	"placeholder.summary": "この説明は存在しません🦑"
 }

@@ -5,12 +5,11 @@ import { LOCALES } from '../localization/mod.ts';
 import type { Response } from './response.ts';
 import { PermissionLevels } from '../util/permissions.ts';
 import { overwriteGlobalCommands } from '../discord.ts';
-import { ping, roll, pokemon, testinfo } from './general/mod.ts';
+import { ping, roll, pokemon } from './general/mod.ts';
 export const commands: Record<string, Command> = {
 	ping,
 	roll,
-	pokemon,
-	testinfo
+	pokemon
 }
 export type CommandResponse = InteractionResponse | InteractionCallbackData | Promise<InteractionResponse | InteractionCallbackData>
 export interface CommandExecutePayload extends Interaction {
