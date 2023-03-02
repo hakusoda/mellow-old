@@ -4,6 +4,7 @@ import { Interaction, verifySignature, InteractionTypes, InteractionResponseType
 import { text } from '../commands/response.ts';
 import { json, error } from './mod.ts';
 import { hasPermission } from '../util/permissions.ts';
+import { channelResponse } from '../helpers/interaction.ts';
 import { isInteractionResponse } from '../util/mod.ts';
 import { commands, processCommand } from '../commands/mod.ts';
 export default async (request: Request) => {
@@ -37,30 +38,18 @@ export default async (request: Request) => {
 			return json({ type: InteractionResponseTypes.Pong });
 		case InteractionTypes.ApplicationCommand: {
 			if (!payload.data?.name)
-				return json({
-					data: text('error.invalid_request')(payload),
-					type: InteractionResponseTypes.ChannelMessageWithSource
-				});
+				return channelResponse(text('error.invalid_request')(payload));
 
 			const command = commands[payload.data.name];
 			if (!command)
-				return json({
-					data: text('error.invalid_request')(payload),
-					type: InteractionResponseTypes.ChannelMessageWithSource
-				});
+				return channelResponse(text('error.invalid_request')(payload));
 
 			if (!await hasPermission(command, payload))
-				return json({
-					data: text('error.no_permission')(payload),
-					type: InteractionResponseTypes.ChannelMessageWithSource
-				});
+				return channelResponse(text('error.no_permission')(payload));
 
 			const data = await processCommand(command, payload);
 			if (!isInteractionResponse(data))
-				return json({
-					data,
-					type: InteractionResponseTypes.ChannelMessageWithSource
-				});
+				return channelResponse(data);
 
 			return json(data);
 		}
