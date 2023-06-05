@@ -1,11 +1,12 @@
 import { serve } from 'sift';
 import interactions from './interactions.ts';
+import signupFinish from './signup-finish.ts';
 
 serve({
-	'/interactions': interactions
+	'/interactions': interactions,
+	'/signup-finished': signupFinish
 });
 
-// deno-lint-ignore no-explicit-any no-inferrable-types
 export function json(data: any, status: number = 200) {
 	return new Response(JSON.stringify(data), {
 		status,

@@ -14,6 +14,7 @@
 
 	"placeholder.summary": "this description does not exist 🦑",
 
+	"error.unknown": "An unknown internal error occurred.",
 	"error.no_permission": "you are not cool enough 🦑",
 	"error.invalid_request": "invalid request received from discord"
 }

@@ -1,8 +1,8 @@
-import { Interaction } from 'discordeno';
+import { validatePermissions } from 'permission-plugin';
 
 import type { Command } from '../commands/mod.ts';
-import { validatePermissions } from 'permission-plugin';
-export async function hasPermission(command: Command, payload: Interaction) {
+import type { DiscordInteraction } from '../types.ts';
+export async function hasPermission(command: Command, payload: DiscordInteraction) {
 	if (!command.permissionLevels)
 		return true;
 	if (typeof command.permissionLevels === 'function')
@@ -16,14 +16,14 @@ export async function hasPermission(command: Command, payload: Interaction) {
 
 export const PermissionLevelHandlers: Record<
 	string,
-	(payload: Interaction, command: Command) => boolean | Promise<boolean>
+	(payload: DiscordInteraction, command: Command) => boolean | Promise<boolean>
 > = {
 	MEMBER: () => true,
 	MODERATOR: (payload) => Boolean(payload.member?.permissions) &&
-		validatePermissions(payload.member!.permissions!, ["MANAGE_GUILD"]),
+		validatePermissions(payload.member!.permissions! as any, ["MANAGE_GUILD"]),
 	ADMIN: (payload) =>
 		Boolean(payload.member?.permissions) &&
-		validatePermissions(payload.member!.permissions!, ["ADMINISTRATOR"]),
+		validatePermissions(payload.member!.permissions! as any, ["ADMINISTRATOR"]),
 	DEVELOPERS: (payload) => ['330217691203895297'].includes((payload.member?.user?.id || payload.user?.id!).toString()),
 }
 

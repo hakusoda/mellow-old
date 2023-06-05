@@ -1,14 +1,22 @@
 // deno-lint-ignore-file no-explicit-any
 import { getFixedT } from 'i18next';
-import type { Interaction, InteractionCallbackData } from 'discordeno';
+import type { InteractionCallbackData } from 'discordeno';
 
-export type Response = (payload: Interaction) => InteractionCallbackData
+import type { DiscordInteraction } from '../types.ts';
+export type Response = (payload: DiscordInteraction) => InteractionCallbackData
 export function text(key: string, args?: any[]): Response {
-	return payload => ({
-		content: getT(payload)(key, args)
-	});
+	return payload => content(getT(payload)(key, args));
 }
 
-function getT({ locale }: Interaction) {
+export function content(content: string) {
+	return { content };
+}
+
+export function defer(callback: () => void) {
+	callback();
+	return { type: 5 };
+}
+
+function getT({ locale }: DiscordInteraction) {
 	return getFixedT(locale, 'command');
 }
