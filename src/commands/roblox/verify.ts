@@ -59,16 +59,16 @@ export default command(async ({ t, token, member, guild_id }) => {
 		components: [{
 			type: 1,
 			components: [{
-				url: 'https://discord.com/api/oauth2/authorize?client_id=1114438661065412658&redirect_uri=http%3A%2F%2Flocalhost%3A5173%2Fcreate-account%2Fdiscord&response_type=code&scope=identify%20email',
+				url: 'https://discord.com/api/oauth2/authorize?client_id=1114438661065412658&redirect_uri=https%3A%2F%2Fwww.voxelified.com%2Fcreate-account%2Fdiscord&response_type=code&scope=identify%20email',
 				type: 2,
 				style: 5,
 				label: 'Continue'
-			}, {
+			}/*, {
 				url: 'https://www.voxelified.com',
 				type: 2,
 				style: 5,
 				label: 'Connect Existing'
-			}, {
+			}*/, {
 				type: 2,
 				style: 2,
 				label: 'Cancel',
