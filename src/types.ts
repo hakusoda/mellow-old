@@ -15,14 +15,13 @@ export interface User {
 export interface MellowBind {
 	id: number
 	type: MellowBindType
-	creator: string
-	created_at: string
 
-	server_id: string
 	target_ids: string[]
 
-	requirement_data: string[]
-	requirement_type: MellowBindRequirementType
+	requirements: {
+		data: string[]
+		type: MellowBindRequirementType
+	}[]
 }
 
 export interface Database {
@@ -135,4 +134,19 @@ export interface DiscordModifyMemberOptions {
 	roles?: string[]
 	channel_id?: string
 	communication_disabled_until?: string
+}
+
+export interface DiscordRole {
+	id: string
+	name: string
+	icon: string | null
+	flags: number
+	color: number
+	hoist: boolean
+	managed: boolean
+	position: number
+	permissions: string
+	mentionable: boolean
+	description: string | null
+	unicode_emoji: string | null
 }

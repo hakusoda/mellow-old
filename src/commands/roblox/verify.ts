@@ -4,43 +4,65 @@ import { editOriginalResponse } from '../../discord.ts';
 
 import { hasFlag } from '../../util/mod.ts';
 import { supabase } from '../../database.ts';
-import { modifyMember } from '../../discord.ts';
+import { getRobloxUserRoles } from '../../roblox.ts';
+import { modifyMember, getServerRoles } from '../../discord.ts';
 import { RobloxLinkFlag, MellowBindType, MellowBindRequirementType } from '../../enums.ts';
 import { getUserByDiscordId, getDiscordServerBinds } from '../../database.ts';
 export default command(async ({ t, token, member, guild_id }) => {
 	const user = await getUserByDiscordId(member!.user.id as any);
 	if (user) {
-		return defer(async () => {
+		return defer(token, async () => {
 			const binds = await getDiscordServerBinds(guild_id);
+			console.log(binds);
 			let met = 0;
+			let roles = member!.roles;
+			let metRoles: string[] = [];
 			let rolesChanged = false;
-			for (const { type, target_ids, requirement_type } of binds) {
+
+			const userBind = await supabase.from('roblox_links').select('target_id').eq('owner', user.id).eq('type', 0).gte('flags', 2).limit(1).single();
+			console.log(userBind);
+			
+			const robloxRoles = binds.some(bind => bind.requirements.some(r => r.type === MellowBindRequirementType.HasRobloxGroupRole)) ? await getRobloxUserRoles(userBind.data!.target_id) : [];
+			console.log(robloxRoles);
+			for (const { type, target_ids, requirements } of binds) {
 				if (type === MellowBindType.Role) {
-					if (requirement_type === MellowBindRequirementType.HasVerifiedUserLink) {
-						const { data, error } = await supabase.from('roblox_links').select('flags').eq('owner', user.id);
-						if (error)
-							throw error;
-						if (data.some(link => hasFlag(link.flags, RobloxLinkFlag.Verified))) {
-							met++;
-							if (!target_ids.every(id => member!.roles.includes(id))) {
-								rolesChanged = true;
-								await modifyMember(guild_id, member!.user.id, {
-									roles: [...member!.roles, ...target_ids]
-								});
-							}
-						} else {
-							const filtered = member!.roles.filter(id => !target_ids.includes(id));
-							if (filtered.length !== member!.roles.length) {
-								rolesChanged = true;
-								await modifyMember(guild_id, member!.user.id, {
-									roles: filtered
-								});
-							}
+					let metRequirements = 0;
+					for (const item of requirements) {
+						if (item.type === MellowBindRequirementType.HasVerifiedUserLink) {
+							const { data, error } = await supabase.from('roblox_links').select('flags').eq('owner', user.id);
+							if (error)
+								throw error;
+							if (data.some(link => hasFlag(link.flags, RobloxLinkFlag.Verified)))
+								metRequirements++;
+						} else if (item.type === MellowBindRequirementType.HasRobloxGroupRole) {
+							if (item.data.every(id => robloxRoles.some(role => role.role.id.toString() == id)))
+								metRequirements++;
+						}
+					}
+
+					if (metRequirements === requirements.length) {
+						met++;
+						metRoles.push(...target_ids);
+						if (!target_ids.every(id => member!.roles.includes(id))) {
+							roles.push(...target_ids.filter(id => !member!.roles.includes(id)));
+							rolesChanged = true;
+						}
+					} else {
+						const filtered = roles.filter(id => !target_ids.includes(id));
+						if (filtered.length !== member!.roles.length) {
+							roles = filtered;
+							rolesChanged = true;
 						}
 					}
 				}
 			}
-			return editOriginalResponse(token, content(`you met ${met}/${binds.length} requirements${rolesChanged ? ', and your roles were updated.' : '.'}`));
+
+			if (rolesChanged)
+				await modifyMember(guild_id, member!.user.id, { roles });
+
+			const dr = metRoles.length ? await getServerRoles(guild_id) : [];
+			let rs = metRoles.length ? `\n\nroles you should have:\n${dr.filter(r => metRoles.includes(r.id)).map(r => r.name).join('\n')}` : '';
+			return editOriginalResponse(token, content(`you met the requirements of ${met}/${binds.length} bindings${rolesChanged ? ', and your roles were updated.' : '.'}${rs}`));
 		});
 	}
 

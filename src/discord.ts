@@ -1,14 +1,20 @@
 import { DISCORD_TOKEN, DISCORD_APP_ID } from './util/constants.ts';
-import type { DiscordModifyMemberOptions } from './types.ts';
+import type { DiscordRole, DiscordModifyMemberOptions } from './types.ts';
 import type { InteractionCallbackData, DiscordCreateApplicationCommand } from 'discordeno';
 
-export function makeRequest(path: string, options: RequestInit = {}) {
+export function makeRequest<T = any>(path: string, options: RequestInit = {}): Promise<{ error: true } | { data: T, error: false }> {
 	options.headers = {
 		authorization: `Bot ${DISCORD_TOKEN}`,
 		'content-type': 'application/json',
 		...options.headers
 	};
-	return fetch(API_BASE + path, options);
+	return fetch(API_BASE + path, options)
+		.then(async response => {
+			if (response.status === 200)
+				return { data: await response.json(), error: false };
+			console.error(response.status, await response.text().catch(() => ''));
+			return { error: true };
+		});
 }
 
 export function overwriteGlobalCommands(commands: DiscordCreateApplicationCommand[]) {
@@ -33,6 +39,11 @@ export function modifyMember(serverId: string, userId: string, options: DiscordM
 			'x-audit-log-reason': reason
 		} : undefined
 	});
+}
+
+export function getServerRoles(serverId: string) {
+	return makeRequest<DiscordRole[]>(`/guilds/${serverId}/roles`)
+		.then(response => response.error ? [] : response.data);
 }
 
 export const API_BASE = 'https://discord.com/api/v10/';
