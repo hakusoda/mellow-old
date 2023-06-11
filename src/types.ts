@@ -1,4 +1,4 @@
-import type { MellowBindType, DiscordChannelType, DiscordInteractionType, MellowBindRequirementType } from './enums.ts';
+import type { MellowLinkType, DiscordChannelType, DiscordInteractionType, MellowLinkRequirementType, MellowLinkRequirementsType } from './enums.ts';
 export interface RobloxLink {
 	id: string
 	owner: string
@@ -14,14 +14,15 @@ export interface User {
 }
 export interface MellowBind {
 	id: number
-	type: MellowBindType
+	type: MellowLinkType
 
 	target_ids: string[]
 
 	requirements: {
 		data: string[]
-		type: MellowBindRequirementType
+		type: MellowLinkRequirementType
 	}[]
+	requirements_type: MellowLinkRequirementsType
 }
 
 export interface Database {

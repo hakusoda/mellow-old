@@ -25,7 +25,7 @@ export async function getUserByDiscordId(userId: string) {
 }
 
 export async function getDiscordServerBinds(serverId: string): Promise<MellowBind[]> {
-	const { data, error } = await supabase.from('mellow_binds').select<string, any>('id, type, target_ids, requirements:mellow_bind_requirements ( type, data )').eq('server_id', serverId);
+	const { data, error } = await supabase.from('mellow_binds').select<string, any>('id, type, target_ids, requirements:mellow_bind_requirements ( type, data ), requirements_type').eq('server_id', serverId);
 	if (error)
 		console.error(error);
 	return error ? [] : data;

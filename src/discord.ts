@@ -28,6 +28,9 @@ export function editOriginalResponse(token: string, message: InteractionCallback
 	return makeRequest(`/webhooks/${DISCORD_APP_ID}/${token}/messages/@original`, {
 		body: JSON.stringify(message),
 		method: 'PATCH'
+	}).then(response => {
+		if (response.error)
+			throw new Error();
 	});
 }
 

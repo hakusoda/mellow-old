@@ -1,9 +1,14 @@
-export enum MellowBindType {
+export enum MellowLinkType {
 	Role
 }
-export enum MellowBindRequirementType {
+export enum MellowLinkRequirementType {
 	HasVerifiedUserLink,
-	HasRobloxGroupRole
+	HasRobloxGroupRole,
+	HasRobloxGroupRankInRange
+}
+export enum MellowLinkRequirementsType {
+	MeetAll,
+	MeetOne
 }
 
 export enum RobloxLinkFlag {
