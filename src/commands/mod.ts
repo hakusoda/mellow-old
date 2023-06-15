@@ -34,7 +34,6 @@ export function command(execute: Command["execute"], options?: Command) {
 }
 
 export async function processCommand(command: Command, payload: DiscordInteraction) {
-	console.log(payload);
 	const response = await command.execute({
 		t: getFixedT(payload.locale, 'command'),
 		...payload

@@ -43,6 +43,7 @@ export interface Database {
 				Row: {
 					id: number
 					user_id: string
+					server_id: string
 					interaction_token: string
 				}
 				Insert: {}
@@ -70,6 +71,21 @@ export interface DiscordPartialUser {
 	public_flags: number
 	discriminator: string
 	avatar_decoration: string | null
+}
+
+export interface DiscordMember {
+	deaf: boolean
+	mute: boolean
+	nick: string | null
+	user: DiscordPartialUser
+	flags: number
+	roles: string[]
+	avatar: string | null
+	pending: boolean
+	joined_at: string
+	permissions: string
+	premium_since: unknown
+	communication_disabled_until: unknown
 }
 
 export interface DiscordInteraction {
@@ -104,20 +120,7 @@ export interface DiscordInteraction {
 		last_message_id: string
 		rate_limit_per_user: number
 	}
-	member: {
-		deaf: boolean
-		mute: boolean
-		nick: string | null
-		user: DiscordPartialUser
-		flags: number
-		roles: string[]
-		avatar: string | null
-		pending: boolean
-		joined_at: string
-		permissions: string
-		premium_since: unknown
-		communication_disabled_until: unknown
-	} | null
+	member: DiscordMember | null
 	guild_id: string
 	channel_id: string
 	entitlements: unknown[]
