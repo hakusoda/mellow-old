@@ -1,11 +1,11 @@
 import { getFixedT } from 'i18next';
 import { InteractionResponse, InteractionCallbackData, ApplicationCommandOption } from 'discordeno';
 
-import { LOCALES } from '../localization/mod.ts';
+import { LOCALES } from '../localisation/mod.ts';
 import type { Response } from './response.ts';
 import { PermissionLevels } from '../util/permissions.ts';
-import type { DiscordInteraction } from '../types.ts';
 import { overwriteGlobalCommands } from '../discord.ts';
+import type { DiscordInteraction, CommandExecutePayload } from '../types.ts';
 
 import { verify } from './roblox/mod.ts';
 import { ping, roll, pokemon } from './general/mod.ts';
@@ -16,9 +16,6 @@ export const commands: Record<string, Command> = {
 	pokemon
 }
 export type CommandResponse = InteractionResponse | InteractionCallbackData | Promise<InteractionResponse | InteractionCallbackData>
-export interface CommandExecutePayload extends DiscordInteraction {
-	t: (keys: string | string[], ...args: any[]) => string
-}
 export interface Command {
 	execute: (payload: CommandExecutePayload) => Response | Promise<Response> | CommandResponse
 	options?: ApplicationCommandOption[]

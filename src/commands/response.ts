@@ -9,16 +9,19 @@ export function text(key: string, args?: any[]): Response {
 	return payload => content(getT(payload)(key, args));
 }
 
-export function content(content: string) {
-	return { content };
+export function content(content: string, flags?: number) {
+	return {
+		flags,
+		content
+	};
 }
 
-export function defer(token: string, callback: () => Promise<void>) {
+export function defer(token: string, callback: () => Promise<void>, flags?: number) {
 	callback().catch(error => {
 		console.error(error);
 		editOriginalResponse(token, content('an unexpected error occurred!'));
 	});
-	return { type: 5 };
+	return { type: 5, data: { flags } };
 }
 
 function getT({ locale }: DiscordInteraction) {

@@ -3,7 +3,5 @@
 	"deno.enable": true,
 	"deno.config": "./deno.jsonc",
 	"deno.importMap": "./import_map.json",
-	"i18n-ally.localesPaths": [
-		"src/localization/locales"
-	]
+	"i18n-ally.localesPaths": ["src/localisation/locales"]
 }

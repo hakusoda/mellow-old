@@ -42,6 +42,7 @@ export interface Database {
 			mellow_signups: {
 				Row: {
 					id: number
+					locale: string
 					user_id: string
 					server_id: string
 					interaction_token: string
@@ -61,7 +62,8 @@ export interface Database {
 	}
 }
 
-export type DiscordLocale = 'en-US'
+// https://discord.com/developers/docs/reference#locales
+export type DiscordLocale = 'ja' | 'en-US'
 
 export interface DiscordPartialUser {
 	id: string
@@ -73,6 +75,7 @@ export interface DiscordPartialUser {
 	avatar_decoration: string | null
 }
 
+// https://discord.com/developers/docs/resources/guild#guild-member-object
 export interface DiscordMember {
 	deaf: boolean
 	mute: boolean
@@ -88,6 +91,7 @@ export interface DiscordMember {
 	communication_disabled_until: unknown
 }
 
+// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-structure
 export interface DiscordInteraction {
 	type: DiscordInteractionType
 	data: {
@@ -130,6 +134,7 @@ export interface DiscordInteraction {
 	entitlement_sku_ids: unknown[]
 }
 
+// https://discord.com/developers/docs/resources/guild#modify-guild-member-json-params
 export interface DiscordModifyMemberOptions {
 	nick?: string
 	mute?: boolean
@@ -140,6 +145,7 @@ export interface DiscordModifyMemberOptions {
 	communication_disabled_until?: string
 }
 
+// https://discord.com/developers/docs/topics/permissions#role-object-role-structure
 export interface DiscordRole {
 	id: string
 	name: string
@@ -153,4 +159,10 @@ export interface DiscordRole {
 	mentionable: boolean
 	description: string | null
 	unicode_emoji: string | null
+}
+
+export type TranslateFn = (keys: string | string[], ...args: any[]) => string
+
+export interface CommandExecutePayload extends DiscordInteraction {
+	t: TranslateFn
 }

@@ -1,0 +1,26 @@
+{
+	"ping": "ping",
+	"ping.summary": "ping pong",
+	"ping.content": "pong!",
+
+	"roll": "roll",
+	"roll.summary": "roll a number between 1 and 6!",
+	"roll.content": "you rolled a {{0}}!",
+
+	"pokemon": "pokémon",
+	"pokemon.summary": "get information about a random Pokémon!",
+	"pokemon.embed.id": "number {{0.id}}",
+	"pokemon.embed.summary": "it is a {{0.types.0.type.name}} type with {{0.abilities.length}} abilities",
+
+	"verify": "sync",
+	"verify.summary": "Sync your Server Profile with your Roblox Account.",
+	"verify.signup": "## Connect Roblox Account\nYou must be new to mellow, click Continue to link your Roblox Account with Voxelified.\nThis message will update with your server profile status after you link a Roblox Account.",
+	"verify.complete.true": "## Server Profile Updated\nthis message is incomplete...",
+	"verify.complete.false": "## Server Profile is up-to-date\nYour server profile is already up-to-date, no adjustments have been made.\n\nIf you were expecting a different result, you may need to wait a few minutes.",
+
+	"placeholder.summary": "this description does not exist 🦑",
+
+	"error.unknown": "An unknown internal error occurred.",
+	"error.no_permission": "you are not cool enough 🦑",
+	"error.invalid_request": "invalid request received from discord"
+}

@@ -5,14 +5,14 @@ import { editOriginalResponse } from '../../discord.ts';
 import { hasFlag } from '../../util/mod.ts';
 import { supabase } from '../../database.ts';
 import { getRobloxUserRoles } from '../../roblox.ts';
-import type { User, DiscordMember } from '../../types.ts';
 import { modifyMember, getServerRoles } from '../../discord.ts';
+import type { User, TranslateFn, DiscordMember } from '../../types.ts';
 import { getUserByDiscordId, getDiscordServerBinds } from '../../database.ts';
-import { RobloxLinkFlag, MellowLinkType, MellowLinkRequirementType, MellowLinkRequirementsType } from '../../enums.ts';
-export default command(async ({ token, member, guild_id }) => {
+import { RobloxLinkFlag, MellowLinkType, DiscordMessageFlag, MellowLinkRequirementType, MellowLinkRequirementsType } from '../../enums.ts';
+export default command(async ({ t, token, member, guild_id }) => {
 	const user = await getUserByDiscordId(member!.user.id as any);
 	if (user)
-		return defer(token, () => verify(token, guild_id, user, member!));
+		return defer(token, () => verify(t, token, guild_id, user, member!), DiscordMessageFlag.Ephemeral);
 
 	console.log('user signup prompt');
 	supabase.from('mellow_signups').upsert({
@@ -24,15 +24,15 @@ export default command(async ({ token, member, guild_id }) => {
 			console.error(error);
 	});
 	return {
-		flags: 1 << 6,
-		content: '## Connect your Roblox Account\nYou must be new to this, click Continue to safely connect your Roblox Account.\nAfter that, this message should update with your verification status.',
+		flags: DiscordMessageFlag.Ephemeral,
+		content: t('verify.signup'),
 		components: [{
 			type: 1,
 			components: [{
 				url: 'https://discord.com/api/oauth2/authorize?client_id=1114438661065412658&redirect_uri=https%3A%2F%2Fwww.voxelified.com%2Fcreate-account%2Fdiscord&response_type=code&scope=identify%20email',
 				type: 2,
 				style: 5,
-				label: 'Continue'
+				label: t('common:action.continue')
 			}/*, {
 				url: 'https://www.voxelified.com',
 				type: 2,
@@ -41,7 +41,7 @@ export default command(async ({ token, member, guild_id }) => {
 			}*/, {
 				type: 2,
 				style: 2,
-				label: 'Cancel',
+				label: t('common:action.cancel'),
 				disabled: true,
 				custom_id: 'verify_account_required_cancel'
 			}]
@@ -49,18 +49,31 @@ export default command(async ({ token, member, guild_id }) => {
 	};
 });
 
-export async function verify(token: string, serverId: string, user: User, member: DiscordMember) {
+export async function verify(t: TranslateFn, token: string, serverId: string, user: User, member: DiscordMember) {
 	console.log(`verifying ${user.name ?? user.username} in ${serverId} as ${member.user.global_name ?? member.user.username}`);
 	const binds = await getDiscordServerBinds(serverId);
 
 	let met = 0;
 	let roles = member.roles;
 	let metRoles: string[] = [];
+	let addedRoles: string[] = [];
+	let removedRoles: string[] = [];
 	let rolesChanged = false;
 
 	const userBind = await supabase.from('roblox_links').select('target_id').eq('owner', user.id).eq('type', 0).gte('flags', 2).limit(1).maybeSingle();
 	if (!userBind.data)
-		return editOriginalResponse(token, content('you do not have a verified roblox account linked via voxelified!\nhttps://www.voxelified.com/settings/roblox/verification'));
+		return editOriginalResponse(token, {
+			content: t('verify.signup'),
+			components: [{
+				type: 1,
+				components: [{
+					url: 'https://www.voxelified.com/roblox/authorise',
+					type: 2,
+					style: 5,
+					label: t('common:action.continue')
+				}]
+			}]
+		});
 	
 	const robloxRoles = binds.some(bind => bind.requirements.some(r => r.type === MellowLinkRequirementType.HasRobloxGroupRole || r.type === MellowLinkRequirementType.HasRobloxGroupRankInRange)) ? await getRobloxUserRoles(userBind.data!.target_id) : [];
 	for (const { type, target_ids, requirements, requirements_type } of binds) {
@@ -91,13 +104,17 @@ export async function verify(token: string, serverId: string, user: User, member
 				met++;
 				metRoles.push(...target_ids);
 				if (!target_ids.every(id => member!.roles.includes(id))) {
-					roles.push(...target_ids.filter(id => !member!.roles.includes(id)));
+					const filtered = target_ids.filter(id => !member!.roles.includes(id));
+					roles.push(...filtered);
+					addedRoles.push(...filtered);
 					rolesChanged = true;
 				}
 			} else {
 				const filtered = roles.filter(id => !target_ids.includes(id));
 				if (filtered.length !== member!.roles.length) {
+					const filtered2 = target_ids.filter(id => roles.includes(id));
 					roles = filtered;
+					removedRoles.push(...filtered2);
 					rolesChanged = true;
 				}
 			}
@@ -107,10 +124,10 @@ export async function verify(token: string, serverId: string, user: User, member
 	if (rolesChanged)
 		await modifyMember(serverId, member.user.id, { roles });
 
-	const dr = metRoles.length ? await getServerRoles(serverId) : [];
-	let rs = metRoles.length ? `\n\nroles you should have:\n${dr.filter(r => metRoles.includes(r.id)).map(r => r.name).join('\n')}` : '';
+	//const dr = metRoles.length ? await getServerRoles(serverId) : [];
+	//let rs = metRoles.length ? `\n\nroles you should have:\n${dr.filter(r => metRoles.includes(r.id)).map(r => r.name).join('\n')}` : '';
 	return editOriginalResponse(token, {
-		content: `you met the requirements of ${met}/${binds.length} bindings${rolesChanged ? ', and your roles were updated.' : '.'}${rs}`,
+		content: t(`verify.complete.${rolesChanged}`),
 		components: []
 	});
 }
