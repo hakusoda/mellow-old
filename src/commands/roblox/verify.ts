@@ -9,13 +9,14 @@ import { modifyMember, getServerRoles } from '../../discord.ts';
 import type { User, TranslateFn, DiscordMember } from '../../types.ts';
 import { getUserByDiscordId, getDiscordServerBinds } from '../../database.ts';
 import { RobloxLinkFlag, MellowLinkType, DiscordMessageFlag, MellowLinkRequirementType, MellowLinkRequirementsType } from '../../enums.ts';
-export default command(async ({ t, token, member, guild_id }) => {
+export default command(async ({ t, token, locale, member, guild_id }) => {
 	const user = await getUserByDiscordId(member!.user.id as any);
 	if (user)
 		return defer(token, () => verify(t, token, guild_id, user, member!), DiscordMessageFlag.Ephemeral);
 
 	console.log('user signup prompt');
 	supabase.from('mellow_signups').upsert({
+		locale,
 		user_id: member!.user.id,
 		server_id: guild_id,
 		interaction_token: token
