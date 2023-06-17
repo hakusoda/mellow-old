@@ -1,11 +1,16 @@
 import { createClient } from 'supabase-js';
 
 import { SUPABASE_URL, SUPABASE_TOKEN } from './util/constants.ts';
-import type { User, Database, MellowBind } from './types.ts';
+import type { User, Database, MellowBind, MellowServer } from './types.ts';
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_TOKEN);
 
 export function getRobloxLink(linkId: string) {
 	return supabase.from('roblox_links').select('*').eq('id', linkId);
+}
+
+export async function getServer(serverId: string): Promise<MellowServer | null> {
+	return await supabase.from('mellow_servers').select('id, default_nickname').eq('id', serverId).limit(1).maybeSingle()
+		.then(response => response.data);
 }
 
 export async function getUser(userId: string): Promise<User | null> {

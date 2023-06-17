@@ -12,6 +12,11 @@ export interface User {
 	created: string
 	username: string
 }
+
+export interface MellowServer {
+	id: string
+	default_nickname: string
+}
 export interface MellowBind {
 	id: number
 	type: MellowLinkType
@@ -136,7 +141,7 @@ export interface DiscordInteraction {
 
 // https://discord.com/developers/docs/resources/guild#modify-guild-member-json-params
 export interface DiscordModifyMemberOptions {
-	nick?: string
+	nick?: string | null
 	mute?: boolean
 	deaf?: boolean
 	flags?: number

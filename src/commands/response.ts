@@ -16,7 +16,7 @@ export function content(content: string, flags?: number) {
 	};
 }
 
-export function defer(token: string, callback: () => Promise<void>, flags?: number) {
+export function defer(token: string, callback: () => Promise<any>, flags?: number) {
 	callback().catch(error => {
 		console.error(error);
 		editOriginalResponse(token, content('an unexpected error occurred!'));

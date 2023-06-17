@@ -15,8 +15,15 @@
 	"verify": "sync",
 	"verify.summary": "Sync your Server Profile with your Roblox Account.",
 	"verify.signup": "## Connect Roblox Account\nYou must be new to mellow, click Continue to link your Roblox Account with Voxelified.\nThis message will update with your server profile status after you link a Roblox Account.",
-	"verify.complete.true": "## Server Profile Updated\nthis message is incomplete...",
+	"verify.complete.true": "## Server Profile Updated\n",
+	"verify.complete.true.0": "Your roles have been updated.",
+	"verify.complete.true.1": "Your nickname has been updated.",
+	"verify.complete.true.2": "Your roles and nickname have been updated.",
 	"verify.complete.false": "## Server Profile is up-to-date\nYour server profile is already up-to-date, no adjustments have been made.\n\nIf you were expecting a different result, you may need to wait a few minutes.",
+	"verify.complete.embed.roles": "Role Changes",
+	"verify.complete.embed.nickname": "Nickname Changes",
+	"verify.no_server": "## Cannot Sync Profile\nThis Discord Server is not connected to mellow, Roblox Syncing is not available.",
+	"verify.profile": "\nYou are currently syncing in this server as [{{0.displayName}}](https://www.roblox.com/users/{{0.id}}/profile).",
 
 	"placeholder.summary": "this description does not exist 🦑",
 

@@ -3,7 +3,7 @@ import { getFixedT } from 'i18next';
 import { verify } from '../commands/roblox/verify.ts';
 import { MELLOW_KEY } from '../util/constants.ts';
 import { getServerMember } from '../discord.ts';
-import { getUser, supabase } from '../database.ts';
+import { getUser, supabase, getServer } from '../database.ts';
 export default async (request: Request) => {
 	if (request.headers.get('x-api-key') !== MELLOW_KEY)
 		return new Response('missing key', { status: 403 });
@@ -24,7 +24,8 @@ export default async (request: Request) => {
 		return new Response('member not found', { status: 400 });
 
 	const t = getFixedT(data.locale, 'command');
-	await verify(t, data.interaction_token, data.server_id, user, member);
+	const server = await getServer(data.server_id);
+	await verify(t, server!, data.interaction_token, data.server_id, user, member);
 
 	await supabase.from('mellow_signups').delete().eq('user_id', discordId);
 

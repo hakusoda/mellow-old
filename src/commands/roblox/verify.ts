@@ -3,16 +3,20 @@ import { defer, content } from '../response.ts';
 import { editOriginalResponse } from '../../discord.ts';
 
 import { hasFlag } from '../../util/mod.ts';
-import { supabase } from '../../database.ts';
-import { getRobloxUserRoles } from '../../roblox.ts';
+import { supabase, getServer } from '../../database.ts';
 import { modifyMember, getServerRoles } from '../../discord.ts';
-import type { User, TranslateFn, DiscordMember } from '../../types.ts';
+import { getRobloxUsers, getRobloxUserRoles } from '../../roblox.ts';
+import type { User, TranslateFn, MellowServer, DiscordMember } from '../../types.ts';
 import { getUserByDiscordId, getDiscordServerBinds } from '../../database.ts';
 import { RobloxLinkFlag, MellowLinkType, DiscordMessageFlag, MellowLinkRequirementType, MellowLinkRequirementsType } from '../../enums.ts';
-export default command(async ({ t, token, locale, member, guild_id }) => {
+export default command(({ t, token, locale, member, guild_id }) => defer(token, async () => {
+	const server = await getServer(guild_id);
+	if (!server)
+		return editOriginalResponse(token, content(t('verify.no_server')));
+
 	const user = await getUserByDiscordId(member!.user.id as any);
 	if (user)
-		return defer(token, () => verify(t, token, guild_id, user, member!), DiscordMessageFlag.Ephemeral);
+		return verify(t, server, token, guild_id, user, member!);
 
 	console.log('user signup prompt');
 	supabase.from('mellow_signups').upsert({
@@ -24,7 +28,7 @@ export default command(async ({ t, token, locale, member, guild_id }) => {
 		if (error)
 			console.error(error);
 	});
-	return {
+	return editOriginalResponse(token, {
 		flags: DiscordMessageFlag.Ephemeral,
 		content: t('verify.signup'),
 		components: [{
@@ -34,28 +38,18 @@ export default command(async ({ t, token, locale, member, guild_id }) => {
 				type: 2,
 				style: 5,
 				label: t('common:action.continue')
-			}/*, {
-				url: 'https://www.voxelified.com',
-				type: 2,
-				style: 5,
-				label: 'Connect Existing'
-			}*/, {
-				type: 2,
-				style: 2,
-				label: t('common:action.cancel'),
-				disabled: true,
-				custom_id: 'verify_account_required_cancel'
 			}]
 		}]
-	};
-});
+	});
+}, DiscordMessageFlag.Ephemeral));
 
-export async function verify(t: TranslateFn, token: string, serverId: string, user: User, member: DiscordMember) {
+export async function verify(t: TranslateFn, server: MellowServer, token: string, serverId: string, user: User, member: DiscordMember) {
 	console.log(`verifying ${user.name ?? user.username} in ${serverId} as ${member.user.global_name ?? member.user.username}`);
 	const binds = await getDiscordServerBinds(serverId);
 
 	let met = 0;
 	let roles = member.roles;
+	let nickname = member.nick;
 	let metRoles: string[] = [];
 	let addedRoles: string[] = [];
 	let removedRoles: string[] = [];
@@ -75,6 +69,12 @@ export async function verify(t: TranslateFn, token: string, serverId: string, us
 				}]
 			}]
 		});
+
+	const [ruser] = await getRobloxUsers([userBind.data.target_id]);
+	const { default_nickname } = server;
+	if (default_nickname) {
+		nickname = default_nickname.replace('{name}', ruser.displayName);
+	}
 	
 	const robloxRoles = binds.some(bind => bind.requirements.some(r => r.type === MellowLinkRequirementType.HasRobloxGroupRole || r.type === MellowLinkRequirementType.HasRobloxGroupRankInRange)) ? await getRobloxUserRoles(userBind.data!.target_id) : [];
 	for (const { type, target_ids, requirements, requirements_type } of binds) {
@@ -122,13 +122,33 @@ export async function verify(t: TranslateFn, token: string, serverId: string, us
 		}
 	}
 
-	if (rolesChanged)
-		await modifyMember(serverId, member.user.id, { roles });
+	const nickChanged = nickname !== member.nick;
+	if (rolesChanged || nickChanged)
+		await modifyMember(serverId, member.user.id, {
+			nick: nickChanged ? nickname?.slice(0, 32) : undefined,
+			roles
+		});
 
 	//const dr = metRoles.length ? await getServerRoles(serverId) : [];
 	//let rs = metRoles.length ? `\n\nroles you should have:\n${dr.filter(r => metRoles.includes(r.id)).map(r => r.name).join('\n')}` : '';
+	const serverRoles = (addedRoles.length + removedRoles.length) ? await getServerRoles(serverId) : [];
+	const profileChanged = rolesChanged || nickChanged;
 	return editOriginalResponse(token, {
-		content: t(`verify.complete.${rolesChanged}`),
+		embeds: profileChanged ? [{
+			fields: [
+				...rolesChanged ? [{
+					name: t('verify.complete.embed.roles'),
+					value: `\`\`\`diff\n${[...removedRoles.map(r => '- ' + serverRoles.find(j => j.id === r)?.name), ...addedRoles.map(r => '+ ' + serverRoles.find(j => j.id === r)?.name)].join('\n')}\`\`\``,
+					inline: true
+				}] : [],
+				...nickChanged ? [{
+					name: t('verify.complete.embed.nickname'),
+					value: `\`\`\`diff\n${nickname ? `${member.nick ? `- ${member.nick}\n` : ''}+ ${nickname}` : `- ${member.nick}`}\`\`\``,
+					inline: true
+				}] : []
+			]
+		}] : undefined,
+		content: t(`verify.complete.${profileChanged}`) + (rolesChanged ? nickChanged ? t('verify.complete.true.2') : t('verify.complete.true.0') : nickChanged ? t('verify.complete.true.1') : '') + t('verify.profile', [ruser]),
 		components: []
 	});
 }
