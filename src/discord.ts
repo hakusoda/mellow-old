@@ -1,5 +1,5 @@
 import { DISCORD_TOKEN, DISCORD_APP_ID } from './util/constants.ts';
-import type { DiscordRole, DiscordMember, DiscordModifyMemberOptions } from './types.ts';
+import type { DiscordRole, DiscordGuild, DiscordMember, DiscordModifyMemberOptions } from './types.ts';
 import type { InteractionCallbackData, DiscordCreateApplicationCommand } from 'discordeno';
 
 export function makeRequest<T = any>(path: string, options: RequestInit = {}): Promise<{ success: false } | { data: T, success: true }> {
@@ -39,6 +39,11 @@ export function getServerMember(serverId: string, userId: string) {
 		.then(response => response.success ? response.data : null);
 }
 
+export function getServerMembers(serverId: string) {
+	return makeRequest<DiscordMember[]>(`/guilds/${serverId}/members?limit=1000`)
+		.then(response => response.success ? response.data : []);
+}
+
 export function modifyMember(serverId: string, userId: string, options: DiscordModifyMemberOptions, reason?: string) {
 	return makeRequest(`/guilds/${serverId}/members/${userId}`, {
 		body: JSON.stringify(options),
@@ -46,12 +51,24 @@ export function modifyMember(serverId: string, userId: string, options: DiscordM
 		headers: reason ? {
 			'x-audit-log-reason': reason
 		} : undefined
-	});
+	}).then(response => {
+		if (!response.success)
+			throw new Error();
+	})
+}
+
+export function getDiscordServer(serverId: string) {
+	return makeRequest<DiscordGuild>(`/guilds/${serverId}`)
+		.then(response => response.success ? response.data : null);
 }
 
 export function getServerRoles(serverId: string) {
 	return makeRequest<DiscordRole[]>(`/guilds/${serverId}/roles`)
 		.then(response => response.success ? response.data : []);
 }
+
+export const getMemberPosition = (server: DiscordGuild, member: DiscordMember) =>
+	member.roles.map(role => server.roles.find(r => r.id === role)!)
+		.sort((a, b) => b.position - a.position)[0].position;
 
 export const API_BASE = 'https://discord.com/api/v10/';

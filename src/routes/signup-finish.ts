@@ -25,7 +25,7 @@ export default async (request: Request) => {
 
 	const t = getFixedT(data.locale, 'command');
 	const server = await getServer(data.server_id);
-	await verify(t, server!, data.interaction_token, data.server_id, user, member);
+	await verify(t, null, server!, data.interaction_token, data.server_id, user, member);
 
 	await supabase.from('mellow_signups').delete().eq('user_id', discordId);
 

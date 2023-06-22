@@ -29,6 +29,13 @@ export async function getUserByDiscordId(userId: string) {
 	return error ? null : data;
 }
 
+export async function getUsersByDiscordId(userIds: string[]) {
+	const { data, error } = await supabase.from('users').select('*').overlaps('mellow_ids', userIds);
+	if (error)
+		console.error(error);
+	return error ? [] : data;
+}
+
 export async function getDiscordServerBinds(serverId: string): Promise<MellowBind[]> {
 	const { data, error } = await supabase.from('mellow_binds').select<string, any>('id, type, target_ids, requirements:mellow_bind_requirements ( type, data ), requirements_type').eq('server_id', serverId);
 	if (error)

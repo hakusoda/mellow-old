@@ -22,7 +22,18 @@ export enum UserFlag {
 
 // https://discord.com/developers/docs/resources/channel#channel-object-channel-types
 export enum DiscordChannelType {
-	Text
+	GuildText,
+	UserDM,
+	GuildVoice,
+	GroupDM,
+	GuildCategory,
+	GuildAnnouncement,
+	AnnouncementThread = 10,
+	PublicThread,
+	PrivateThread,
+	GuildStageVoice,
+	GuildDirectory,
+	GuildForum
 }
 
 // https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-type
@@ -47,4 +58,19 @@ export enum DiscordMessageFlag {
 	FailedToMentionSomeRolesInThread = 1 << 8,
 	SuppressNotifications = 1 << 12,
 	IsVoiceMessage = 1 << 13
+}
+
+// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
+export enum DiscordApplicationCommandOptionType {
+	SubCommand = 1,
+	SubCommandGroup,
+	String,
+	Integer,
+	Boolean,
+	User,
+	Channel,
+	Role,
+	Mentionable,
+	Number,
+	Attachment
 }
