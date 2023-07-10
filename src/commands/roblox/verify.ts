@@ -2,10 +2,11 @@ import { command } from '../mod.ts';
 import { defer, content } from '../response.ts';
 import { editOriginalResponse } from '../../discord.ts';
 
-import { DiscordMessageFlag } from '../../enums.ts';
+import { sendLogs } from '../../logging.ts';
 import { supabase, getServer } from '../../database.ts';
 import { syncMember, getRobloxUsers } from '../../roblox.ts';
 import { getDiscordServer, getMemberPosition } from '../../discord.ts';
+import { DiscordMessageFlag, MellowServerLogType } from '../../enums.ts';
 import { getUserByDiscordId, getDiscordServerBinds } from '../../database.ts';
 import type { User, TranslateFn, MellowServer, DiscordMember } from '../../types.ts';
 export default command(({ t, token, locale, member, guild_id }) => defer(token, async () => {
@@ -17,7 +18,6 @@ export default command(({ t, token, locale, member, guild_id }) => defer(token, 
 	if (user)
 		return verify(t, null, server, token, guild_id, user, member!);
 
-	console.log('user signup prompt');
 	supabase.from('mellow_signups').upsert({
 		locale,
 		user_id: member!.user.id,
@@ -71,6 +71,15 @@ export async function verify(t: TranslateFn, executor: DiscordMember | null, ser
 	] = await syncMember(null, server, serverLinks, discordServer, user, member, ruser, position);
 
 	const profileChanged = rolesChanged || nickChanged;
+	if (profileChanged)
+		await sendLogs([[MellowServerLogType.ServerProfileSync, {
+			member,
+			roblox: ruser,
+			nickname: [member.nick, newNickname],
+			addedRoles,
+			removedRoles
+		}]], discordServer.id);
+
 	return editOriginalResponse(token, {
 		embeds: profileChanged ? [{
 			fields: [

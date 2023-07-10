@@ -1,0 +1,7 @@
+{
+	"type.1": "Audit Log",
+	"type.1.content": "Click [here](https://www.voxelified.com/mellow/server/{{0.server_id}}/settings/roblox/binds?highlight={{0.target_link_id}}) to view the Roblox Link on Voxelified.",
+	"type.2": "Server Profile Sync",
+	"type.2.title": "{{0}} synced their Server Profile",
+	"type.2.content": "They are currently syncing in this server as [{{0.roblox.displayName}}](https://www.roblox.com/users/{{0.roblox.id}}/profile)."
+}

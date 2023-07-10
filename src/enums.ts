@@ -12,6 +12,20 @@ export enum MellowLinkRequirementsType {
 	MeetOne
 }
 
+export enum MellowServerAuditLogType {
+	CreateServer,
+	CreateRobloxLink,
+	UpdateRobloxGlobalSettings,
+	DeleteRobloxLink,
+	UpdateRobloxLink
+}
+
+export enum MellowServerLogType {
+	None,
+	AuditLog = 1 << 0,
+	ServerProfileSync = 1 << 1
+}
+
 export enum RobloxLinkFlag {
 	None,
 	Verified = 1 << 1

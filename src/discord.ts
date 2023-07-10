@@ -24,6 +24,16 @@ export function overwriteGlobalCommands(commands: DiscordCreateApplicationComman
 	});
 }
 
+export function createChannelMessage(channelId: string, payload: any) {
+	return makeRequest(`/channels/${channelId}/messages`, {
+		body: JSON.stringify(payload),
+		method: 'POST'
+	}).then(response => {
+		if (!response.success)
+			throw new Error();
+	});
+}
+
 export function editOriginalResponse(token: string, message: InteractionCallbackData) {
 	return makeRequest(`/webhooks/${DISCORD_APP_ID}/${token}/messages/@original`, {
 		body: JSON.stringify(message),
