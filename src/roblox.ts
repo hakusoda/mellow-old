@@ -22,7 +22,6 @@ export function getRobloxUserRoles(userId: string | number) {
 }
 
 export async function syncMember(executor: DiscordMember | null, server: MellowServer, serverLinks: MellowBind[], discordServer: DiscordGuild, user: User, member: DiscordMember, robloxUser: PartialRobloxUser, mellowPosition: number): Promise<[boolean, DiscordRole[], DiscordRole[], boolean, string | null]> {
-	console.log(`verifying ${user.name ?? user.username} in ${server.id} as ${member.user.global_name ?? member.user.username}`);
 	let roles = [...member.roles];
 	let nickname = member.nick;
 	let rolesChanged = false;
@@ -30,8 +29,6 @@ export async function syncMember(executor: DiscordMember | null, server: MellowS
 	const position = getMemberPosition(discordServer, member);
 	const addedRoles: DiscordRole[] = [];
 	const removedRoles: DiscordRole[] = [];
-	const unaddableRoles = [];
-	const unremovableRoles = [];
 
 	const { default_nickname } = server;
 	if (default_nickname)
@@ -73,7 +70,7 @@ export async function syncMember(executor: DiscordMember | null, server: MellowS
 				}
 			} else {
 				const filtered = roles.filter(id => !target_ids.includes(id));
-				if (filtered.length !== member!.roles.length) {
+				if (!roles.every(id => filtered.includes(id))) {
 					const filtered2 = target_ids.filter(id => roles.includes(id));
 					roles = filtered;
 					removedRoles.push(...filtered2.map(r => discordServer.roles.find(j => j.id === r)!));
