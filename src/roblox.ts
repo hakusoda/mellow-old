@@ -57,7 +57,9 @@ export async function syncMember(executor: DiscordMember | null, server: MellowS
 					const min2 = parseInt(min), max2 = parseInt(max);
 					if (robloxRoles.some(role => role.group.id.toString() === group && role.role.rank >= min2 && role.role.rank <= max2))
 						metRequirements++;
-				}
+				} else if (item.type === MellowLinkRequirementType.InRobloxGroup)
+					if (robloxRoles.some(role => role.group.id.toString() === item.data[0]))
+						metRequirements++;
 				if (requiresOne && metRequirements)
 					break;
 			}

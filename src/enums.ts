@@ -4,7 +4,8 @@ export enum MellowLinkType {
 export enum MellowLinkRequirementType {
 	HasVerifiedUserLink,
 	HasRobloxGroupRole,
-	HasRobloxGroupRankInRange
+	HasRobloxGroupRankInRange,
+	InRobloxGroup
 }
 export enum MellowLinkRequirementsType {
 	MeetAll,
