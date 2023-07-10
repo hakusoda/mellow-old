@@ -39,7 +39,6 @@ export function command<T extends readonly DiscordApplicationCommandOptions[]>(e
 
 export async function processCommand(command: Command<any>, payload: DiscordInteraction) {
 	const { options, resolved } = payload.data;
-	console.log(payload.data.options, payload.data.resolved);
 	const data = Object.fromEntries(options?.map(({ name, type, value }) => {
 		if (type === DiscordApplicationCommandOptionType.User)
 			return [name, {
@@ -48,7 +47,6 @@ export async function processCommand(command: Command<any>, payload: DiscordInte
 			}];
 		return [name, value];
 	}) ?? []);
-	console.log(data);
 
 	const response = await command.execute({
 		t: getFixedT(payload.locale, 'command'),

@@ -69,6 +69,6 @@ export function getServerRoles(serverId: string) {
 
 export const getMemberPosition = (server: DiscordGuild, member: DiscordMember) =>
 	member.roles.map(role => server.roles.find(r => r.id === role)!)
-		.sort((a, b) => b.position - a.position)[0].position;
+		.sort((a, b) => b.position - a.position)[0]?.position ?? 0;
 
 export const API_BASE = 'https://discord.com/api/v10/';
