@@ -2,10 +2,12 @@
 	"action.cancel": "Cancel",
 	"action.continue": "Continue",
 
+	"view_roblox_link": "Click [here](https://www.voxelified.com/mellow/server/{{0.server_id}}/settings/roblox/binds?highlight={{0.target_link_id}}) to view the Roblox Link on Voxelified.",
+
 	"server_audit_log.type.0": "added this server to mellow",
 	"server_audit_log.type.1": "created a Roblox Link named {{0.data.name}}",
 	"server_audit_log.type.2": "updated the Global Roblox Settings",
-	"server_audit_log.type.2.default_nickname": "Changed the Default Nickname from \"{{0.data.default_nickname.0}}\" to \"{{0.data.default_nickname.1}}\"",
+	"server_audit_log.type.2.default_nickname": "Default Nickname Updated",
 	"server_audit_log.type.3": "deleted a Roblox Link named {{0.data.name}}",
 	"server_audit_log.type.4": "updated the \"{{0.data.name.0}}\" Roblox Link",
 	"server_audit_log.type.4.name": "Name Updated",
@@ -13,7 +15,14 @@
 	"server_audit_log.type.4.target_ids": "Targets Updated",
 	"server_audit_log.type.4.requirements": "Requirements Updated",
 	"server_audit_log.type.4.requirements_type": "Requirements Type Updated",
+	"server_audit_log.type.5": "updated logging settings",
+	"server_audit_log.type.5.types": "Enabled Actions Changes",
+	"server_audit_log.type.5.channel": "Target Channel Updated",
 
 	"requirements_type.0": "Must meet all",
-	"requirements_type.1": "Must meet at least one"
+	"requirements_type.1": "Must meet at least one",
+
+	"mellow_server_logging_type.0": "",
+	"mellow_server_logging_type.1": "Mellow Audit Log",
+	"mellow_server_logging_type.2": "Server Profile Sync"
 }

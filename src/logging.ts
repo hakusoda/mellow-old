@@ -5,6 +5,9 @@ import { supabase } from './database.ts';
 import { createChannelMessage } from './discord.ts';
 import { MellowServerLogType, MellowServerAuditLogType } from './enums.ts';
 import type { DiscordRole, DiscordMember, PartialRobloxUser } from './types.ts';
+const mapLogTypes = (old: number, now: number, t: (key: string) => string) =>
+	Object.values(MellowServerLogType).filter(i => typeof i === 'number' && i && hasFlag(old, i) && !hasFlag(now, i)).map(i => t(`mellow_server_logging_type.${i as MellowServerLogType}`));
+
 export async function sendLogs(logs: Log[], serverId: string) {
 	const embeds: any[] = [];
 
@@ -27,6 +30,8 @@ export async function sendLogs(logs: Log[], serverId: string) {
 
 					const authorName = author.data.name ? author.data.name : `@${author.data.username}`;
 					const fields: any[] = [];
+
+					let description: string | undefined = undefined;
 					if (data.type === MellowServerAuditLogType.UpdateRobloxLink) {
 						if (data.data.name[1])
 							fields.push({
@@ -56,7 +61,29 @@ export async function sendLogs(logs: Log[], serverId: string) {
 								name: t('server_audit_log.type.4.requirements_type'),
 								value: `\`\`\`diff\n- ${t(`requirements_type.${data.data.requirements_type[0]}`)}\n+ ${t(`requirements_type.${data.data.requirements_type[1]}`)}\`\`\``
 							});
+					} else if (data.type === MellowServerAuditLogType.UpdateLogging) {
+						if (data.data.types[1] !== undefined)
+							fields.push({
+								name: t('server_audit_log.type.5.types'),
+								value: `\`\`\`diff\n${mapLogTypes(data.data.types[0], data.data.types[1], t).map(i => `- ${i}`).join('\n')}\n${mapLogTypes(data.data.types[1], data.data.types[0], t).map(i => `+ ${i}`).join('\n')}\`\`\``
+							});
+						
+						const [oldChannel, newChannel] = data.data.channel;
+						if (newChannel !== undefined)
+							fields.push({
+								name: t('server_audit_log.type.5.channel'),
+								value: `\`\`\`diff\n${oldChannel ? `- ${oldChannel}\n` : ''}${newChannel ? `+ ${newChannel}` : ''}\`\`\``
+							});
+					} else if (data.type === MellowServerAuditLogType.UpdateRobloxGlobalSettings) {
+						const [oldNick, newNick] = data.data.default_nickname;
+						if (newNick)
+							fields.push({
+								name: t('server_audit_log.type.2.default_nickname'),
+								value: `\`\`\`diff\n${oldNick ? `- ${oldNick}\n` : ''}${newNick ? `+ ${newNick}` : ''}\`\`\``
+							});
 					}
+					if (data.target_link_id)
+						description = t('view_roblox_link', [data]);
 
 					embeds.push({
 						title: `${authorName} ${t(`server_audit_log.type.${data.type}`, [data])}`,
@@ -70,7 +97,7 @@ export async function sendLogs(logs: Log[], serverId: string) {
 							text: t(`logging:type.${type}`)
 						},
 						timestamp: data.created_at,
-						description: t(`logging:type.${type}.content`, [data])
+						description
 					});
 				} else if (type === MellowServerLogType.ServerProfileSync) {
 					const rolesChanged = data.addedRoles.length || data.removedRoles.length;
