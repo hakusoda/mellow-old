@@ -9,9 +9,11 @@ export interface User {
 	bio: string
 	name: string
 	flags: number
-	created: string
 	username: string
+	created_at: string
+	avatar_url: string
 	mellow_ids: string[]
+	primary_roblox_link_id: string | null
 }
 
 export interface MellowServer {

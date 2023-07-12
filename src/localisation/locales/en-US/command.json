@@ -31,6 +31,15 @@
 	"update": "forcesync",
 	"update.summary": "Forcefully sync someone's server profile.",
 
+	"whois": "profile",
+	"whois.summary": "Request someone's Voxelified Profile.",
+	"whois.empty_bio": "This user hasn't written a bio yet...",
+	"whois.roles": "Roles",
+	"whois.roblox": "Known on Roblox as",
+	"whois.roblox.sync": "Syncing in this server as",
+	"whois.roblox.user": "[{{0.displayName}} (@{{0.name}})](https://www.roblox.com/users/{{0.id}})",
+	"whois.joined": "Joined",
+
 	"placeholder.summary": "this description does not exist 🦑",
 
 	"error.unknown": "An unknown internal error occurred.",

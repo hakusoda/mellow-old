@@ -24,5 +24,8 @@
 
 	"mellow_server_logging_type.0": "",
 	"mellow_server_logging_type.1": "Mellow Audit Log",
-	"mellow_server_logging_type.2": "Server Profile Sync"
+	"mellow_server_logging_type.2": "Server Profile Sync",
+
+	"user_flag.2": "Staff",
+	"user_flag.4": "Tester"
 }

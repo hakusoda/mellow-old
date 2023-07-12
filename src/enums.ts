@@ -35,7 +35,9 @@ export enum RobloxLinkFlag {
 }
 
 export enum UserFlag {
-	
+	None,
+	Staff = 1 << 1,
+	Tester = 1 << 2
 }
 
 // https://discord.com/developers/docs/resources/channel#channel-object-channel-types

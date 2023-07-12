@@ -8,10 +8,11 @@ import { DiscordApplicationCommandOptionType } from '../enums.ts';
 import type { DiscordInteraction, CommandExecutePayload, DiscordApplicationCommandOptions, DiscordApplicationCommandOptionTypeMap, DiscordApplicationIntegerNumberCommandOption } from '../types.ts';
 
 import { verify, update, verifyall } from './roblox/mod.ts';
-import { ping, roll, pokemon } from './general/mod.ts';
+import { ping, roll, whois, pokemon } from './general/mod.ts';
 export const commands: Record<string, Command<any>> = {
 	ping,
 	roll,
+	whois,
 	verify,
 	update,
 	pokemon,
