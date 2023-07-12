@@ -19,12 +19,13 @@ export interface MellowServer {
 	default_nickname: string
 }
 export interface MellowBind {
-	id: number
+	id: string
 	type: MellowLinkType
 
 	target_ids: string[]
 
 	requirements: {
+		id: string
 		data: string[]
 		type: MellowLinkRequirementType
 	}[]
