@@ -1,4 +1,4 @@
-import type { MellowLinkType, DiscordChannelType, DiscordInteractionType, MellowLinkRequirementType, MellowLinkRequirementsType, DiscordApplicationCommandOptionType } from './enums.ts';
+import type { MellowLinkType, DiscordChannelType, MellowServerLogType, DiscordInteractionType, CustomCommandActionType, MellowServerAuditLogType, MellowLinkRequirementType, MellowLinkRequirementsType, CustomCommandActionParentType, DiscordApplicationCommandOptionType } from './enums.ts';
 export interface RobloxLink {
 	id: string
 	owner: string
@@ -33,6 +33,50 @@ export interface MellowBind {
 	}[]
 	requirements_type: MellowLinkRequirementsType
 }
+
+export interface CustomCommand {
+	id: string
+	name: string
+	actions: CustomCommandAction[]
+}
+
+export interface CustomCommandAction {
+	id: string
+	data: any
+	type: CustomCommandActionType
+	position: number
+	parent_id: string | null
+	created_at: string
+	parent_type: CustomCommandActionParentType | null
+}
+
+export interface RobloxServerProfileSyncResult {
+	addedRoles: DiscordRole[]
+	rolesChanged: boolean
+	removedRoles: DiscordRole[]
+
+	newNickname: string | null
+	nicknameChanged: boolean
+}
+
+type AuditLogLog = [MellowServerLogType.AuditLog, {
+	id: string
+	data: any
+	type: MellowServerAuditLogType
+	author_id: string
+	server_id: string
+	created_at: string
+	target_link_id: string
+}]
+type ServerProfileSyncLog = [MellowServerLogType.ServerProfileSync, {
+	member: DiscordMember
+	roblox: PartialRobloxUser
+	nickname: [string | null, string | null]
+	addedRoles: DiscordRole[]
+	removedRoles: DiscordRole[]
+}]
+
+export type Log = AuditLogLog | ServerProfileSyncLog
 
 export interface Database {
 	public: {

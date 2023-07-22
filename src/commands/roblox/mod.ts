@@ -1,3 +1,3 @@
-export { default as verify } from './verify.ts';
-export { default as update } from './update.ts';
-export { default as verifyall } from './verifyall.ts';
+export { default as sync } from './sync.ts';
+export { default as forcesync } from './forcesync.ts';
+export { default as forcesyncall } from './forcesyncall.ts';

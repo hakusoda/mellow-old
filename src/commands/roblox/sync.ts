@@ -62,15 +62,16 @@ export async function verify(t: TranslateFn, executor: DiscordMember | null, ser
 	const serverLinks = await getDiscordServerBinds(serverId);
 	const discordServer = (await getDiscordServer(serverId))!;
 	const position = getMemberPosition(discordServer, member);
-	const [
-		rolesChanged,
+	const {
 		addedRoles,
 		removedRoles,
-		nickChanged,
-		newNickname
-	] = await syncMember(null, server, serverLinks, discordServer, user, member, ruser, position);
+		rolesChanged,
 
-	const profileChanged = rolesChanged || nickChanged;
+		newNickname,
+		nicknameChanged
+	 } = await syncMember(null, server, serverLinks, discordServer, user, member, ruser, position);
+
+	const profileChanged = rolesChanged || nicknameChanged;
 	if (profileChanged)
 		await sendLogs([[MellowServerLogType.ServerProfileSync, {
 			member,
@@ -88,14 +89,14 @@ export async function verify(t: TranslateFn, executor: DiscordMember | null, ser
 					value: `\`\`\`diff\n${[...removedRoles.map(r => '- ' + r.name), ...addedRoles.map(r => '+ ' + r.name)].join('\n')}\`\`\``,
 					inline: true
 				}] : [],
-				...nickChanged ? [{
+				...nicknameChanged ? [{
 					name: t('verify.complete.embed.nickname'),
 					value: `\`\`\`diff\n${newNickname ? `${member.nick ? `- ${member.nick}\n` : ''}+ ${newNickname}` : `- ${member.nick}`}\`\`\``,
 					inline: true
 				}] : []
 			]
 		}] : undefined,
-		content: t(`verify.complete.${profileChanged}`) + (rolesChanged ? nickChanged ? t('verify.complete.true.2') : t('verify.complete.true.0') : nickChanged ? t('verify.complete.true.1') : '') + t('verify.profile', [ruser]),
+		content: t(`verify.complete.${profileChanged}`) + (rolesChanged ? nicknameChanged ? t('verify.complete.true.2') : t('verify.complete.true.0') : nicknameChanged ? t('verify.complete.true.1') : '') + t('verify.profile', [ruser]),
 		components: []
 	});
 }

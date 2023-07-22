@@ -1,10 +1,10 @@
 import { getFixedT } from 'i18next';
 
-import { hasFlag } from './util/mod.ts';
+import type { Log } from './types.ts';
 import { supabase } from './database.ts';
+import { hasFlag, splitArray } from './util/mod.ts';
 import { createChannelMessage } from './discord.ts';
 import { MellowServerLogType, MellowServerAuditLogType } from './enums.ts';
-import type { DiscordRole, DiscordMember, PartialRobloxUser } from './types.ts';
 const mapLogTypes = (old: number, now: number, t: (key: string) => string) =>
 	Object.values(MellowServerLogType).filter(i => typeof i === 'number' && i && hasFlag(old, i) && !hasFlag(now, i)).map(i => t(`mellow_server_logging_type.${i as MellowServerLogType}`));
 
@@ -133,27 +133,9 @@ export async function sendLogs(logs: Log[], serverId: string) {
 		}
 
 		if (embeds.length)
-			await createChannelMessage(server.data.logging_channel_id, {
-				embeds
-			});
+			for (const chunk of splitArray(embeds, 10))
+				await createChannelMessage(server.data.logging_channel_id, {
+					embeds: chunk
+				});
 	}
 }
-
-type AuditLogLog = [MellowServerLogType.AuditLog, {
-	id: string
-	data: any
-	type: MellowServerAuditLogType
-	author_id: string
-	server_id: string
-	created_at: string
-	target_link_id: string
-}]
-type ServerProfileSyncLog = [MellowServerLogType.ServerProfileSync, {
-	member: DiscordMember
-	roblox: PartialRobloxUser
-	nickname: [string | null, string | null]
-	addedRoles: DiscordRole[]
-	removedRoles: DiscordRole[]
-}]
-
-type Log = AuditLogLog | ServerProfileSyncLog

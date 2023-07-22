@@ -1,6 +1,6 @@
 import { getFixedT } from 'i18next';
 
-import { verify } from '../commands/roblox/verify.ts';
+import { verify } from '../commands/roblox/sync.ts';
 import { MELLOW_KEY } from '../util/constants.ts';
 import { getServerMember } from '../discord.ts';
 import { getUser, supabase, getServer } from '../database.ts';

@@ -2,7 +2,7 @@ import { command } from '../mod.ts';
 import { defer, content } from '../response.ts';
 import { editOriginalResponse } from '../../discord.ts';
 
-import { verify } from './verify.ts';
+import { verify } from './sync.ts';
 import { getServer } from '../../database.ts';
 import { getUserByDiscordId } from '../../database.ts';
 import { DiscordMessageFlag, DiscordApplicationCommandOptionType } from '../../enums.ts';

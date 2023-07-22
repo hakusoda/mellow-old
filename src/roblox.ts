@@ -2,7 +2,7 @@ import { hasFlag } from './util/mod.ts';
 import { supabase } from './database.ts';
 import { modifyMember, getMemberPosition } from './discord.ts';
 import { RobloxLinkFlag, MellowLinkType, MellowLinkRequirementType, MellowLinkRequirementsType } from './enums.ts';
-import type { User, MellowBind, DiscordRole, MellowServer, DiscordGuild, DiscordMember, PartialRobloxUser, RobloxUsersResponse, RobloxUserRolesResponse } from './types.ts';
+import type { User, MellowBind, DiscordRole, MellowServer, DiscordGuild, DiscordMember, PartialRobloxUser, RobloxUsersResponse, RobloxUserRolesResponse, RobloxServerProfileSyncResult } from './types.ts';
 export function getRobloxUsers(userIds: (string | number)[]) {
 	return fetch(`https://users.roblox.com/v1/users`, {
 		body: JSON.stringify({
@@ -21,7 +21,7 @@ export function getRobloxUserRoles(userId: string | number) {
 		.then(data => (data as RobloxUserRolesResponse).data);
 }
 
-export async function syncMember(executor: DiscordMember | null, server: MellowServer, serverLinks: MellowBind[], discordServer: DiscordGuild, user: User, member: DiscordMember, robloxUser: PartialRobloxUser, mellowPosition: number): Promise<[boolean, DiscordRole[], DiscordRole[], boolean, string | null]> {
+export async function syncMember(executor: DiscordMember | null, server: MellowServer, serverLinks: MellowBind[], discordServer: DiscordGuild, user: User, member: DiscordMember, robloxUser: PartialRobloxUser, mellowPosition: number): Promise<RobloxServerProfileSyncResult> {
 	let roles = [...member.roles];
 	let nickname = member.nick;
 	let rolesChanged = false;
@@ -68,7 +68,13 @@ export async function syncMember(executor: DiscordMember | null, server: MellowS
 			roles
 		}, executor ? `Forcefully synced by ${executor.user.global_name} (@${executor.user.username})` : 'Roblox Server Profile Sync');
 	
-	return [rolesChanged, addedRoles, removedRoles, nickChanged, nickname];
+	return {
+		addedRoles,
+		newNickname: nickname,
+		removedRoles,
+		rolesChanged,
+		nicknameChanged: nickChanged
+	};
 }
 
 async function meetsLink(user: User, { type, requirements, requirements_type }: MellowBind, robloxRoles: RobloxUserRolesResponse['data'], requirementsCache: Record<string, boolean>, metTypeLinks: MellowBind[]) {

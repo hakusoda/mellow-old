@@ -40,6 +40,28 @@ export enum UserFlag {
 	Tester = 1 << 2
 }
 
+export enum CustomCommandActionType {
+	GetRandomIntegerBetween,
+	IfStatement,
+	EndWithMessage
+}
+
+export enum CustomCommandActionParentType {
+	UseActionResult,
+	IfStatementThen,
+	IfStatementElse
+}
+
+export enum CustomCommandIfStatementType {
+	Equals
+}
+
+export enum CustomCommandActionResultType {
+	None,
+	Data,
+	Finish
+}
+
 // https://discord.com/developers/docs/resources/channel#channel-object-channel-types
 export enum DiscordChannelType {
 	GuildText,

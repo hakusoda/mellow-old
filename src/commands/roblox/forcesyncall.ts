@@ -2,10 +2,12 @@ import { command } from '../mod.ts';
 import { defer, content } from '../response.ts';
 import { editOriginalResponse } from '../../discord.ts';
 
+import type { Log } from '../../types.ts';
+import { sendLogs } from '../../logging.ts';
 import { DISCORD_APP_ID } from '../../util/constants.ts';
-import { DiscordMessageFlag } from '../../enums.ts';
 import { supabase, getServer } from '../../database.ts';
 import { syncMember, getRobloxUsers } from '../../roblox.ts';
+import { DiscordMessageFlag, MellowServerLogType } from '../../enums.ts';
 import { getUsersByDiscordId, getDiscordServerBinds } from '../../database.ts';
 import { getDiscordServer, getServerMembers, getMemberPosition } from '../../discord.ts';
 export default command(({ t, token, member, guild_id }) => defer(token, async () => {
@@ -31,6 +33,7 @@ export default command(({ t, token, member, guild_id }) => defer(token, async ()
 	if (!discordServer)
 		throw new Error();
 
+	const syncLogs: Log[] = [];
 	const mellowPosition = getMemberPosition(discordServer, mellow);
 	for (const user of users) {
 		const target = members.find(member => user.mellow_ids.includes(member.user.id));
@@ -38,11 +41,31 @@ export default command(({ t, token, member, guild_id }) => defer(token, async ()
 			const userLinks = links.filter(link => link.owner === user.id);
 			const robloxUser = robloxUsers.find(user => userLinks.some(link => link.target_id === user.id));
 			if (robloxUser) {
-				await syncMember(member, server, serverLinks, discordServer, user, target, robloxUser, mellowPosition);
+				const {
+					addedRoles,
+					removedRoles,
+					rolesChanged,
+			
+					newNickname,
+					nicknameChanged
+				} = await syncMember(member, server, serverLinks, discordServer, user, target, robloxUser, mellowPosition);
+				const profileChanged = rolesChanged || nicknameChanged;
+				if (profileChanged)
+					syncLogs.push([MellowServerLogType.ServerProfileSync, {
+						member: target,
+						roblox: robloxUser,
+						nickname: [target.nick, newNickname],
+						addedRoles,
+						removedRoles
+					}]);
+				
 				synced++;
 			}
 		}
 	}
+
+	if (syncLogs.length)
+		await sendLogs(syncLogs, guild_id);
 
 	return editOriginalResponse(token, content(`successfully synced ${synced}/${members.length} server profiles`));
 }, DiscordMessageFlag.Ephemeral), {

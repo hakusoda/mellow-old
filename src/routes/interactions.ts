@@ -1,11 +1,14 @@
 import { validateRequest } from 'sift';
 import { verifySignature, InteractionResponseTypes } from 'discordeno';
 
-import { text } from '../commands/response.ts';
+import { supabase } from '../database.ts';
 import { json, error } from './mod.ts';
+import { text, defer } from '../commands/response.ts';
 import { hasPermission } from '../util/permissions.ts';
 import { channelResponse } from '../helpers/interaction.ts';
 import { DISCORD_PUBLIC_KEY } from '../util/constants.ts';
+import { editOriginalResponse } from '../discord.ts';
+import { processCustomCommand } from '../commands/custom.ts';
 import { isInteractionResponse } from '../util/mod.ts';
 import { DiscordInteractionType } from '../enums.ts';
 import type { DiscordInteraction } from '../types.ts';
@@ -36,9 +39,23 @@ export default async (request: Request) => {
 		case DiscordInteractionType.Ping:
 			return json({ type: InteractionResponseTypes.Pong });
 		case DiscordInteractionType.ApplicationCommand: {
+			console.log(payload);
 			if (!payload.data?.name)
 				return channelResponse(text('error.invalid_request')(payload));
 
+			const guildId = (payload.data as any).guild_id;
+			if (guildId) {
+				return json(defer(payload.token, async () => {
+					const { data, error } = await supabase.from('mellow_server_commands').select('id, name, actions:mellow_server_command_actions ( id, type, data, position, created_at, parent_id, parent_type )').eq('name', payload.data.name).eq('server_id', guildId).limit(1).single();
+					if (error) {
+						console.error(error);
+						return editOriginalResponse(payload.token, { content: 'command error ow!!!' });
+					}
+
+					await processCustomCommand(payload, data as any);
+				}));
+			}
+			
 			const command = commands[payload.data.name];
 			if (!command)
 				return channelResponse(text('error.invalid_request')(payload));

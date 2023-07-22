@@ -7,16 +7,16 @@ import { overwriteGlobalCommands } from '../discord.ts';
 import { DiscordApplicationCommandOptionType } from '../enums.ts';
 import type { DiscordInteraction, CommandExecutePayload, DiscordApplicationCommandOptions, DiscordApplicationCommandOptionTypeMap, DiscordApplicationIntegerNumberCommandOption } from '../types.ts';
 
-import { verify, update, verifyall } from './roblox/mod.ts';
 import { ping, roll, whois, pokemon } from './general/mod.ts';
+import { sync, forcesync, forcesyncall } from './roblox/mod.ts';
 export const commands: Record<string, Command<any>> = {
 	ping,
 	roll,
+	sync,
 	whois,
-	verify,
-	update,
 	pokemon,
-	verifyall
+	forcesync,
+	forcesyncall
 }
 export type CommandResponse = InteractionResponse | InteractionCallbackData | Promise<InteractionResponse | InteractionCallbackData>
 export interface Command<T extends readonly DiscordApplicationCommandOptions[]> {
