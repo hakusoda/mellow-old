@@ -13,7 +13,7 @@ import { getDiscordServer, getServerMembers, getMemberPosition } from '../../dis
 export default command(({ t, token, member, guild_id }) => defer(token, async () => {
 	const server = await getServer(guild_id);
 	if (!server)
-		return editOriginalResponse(token, content(t('verify.no_server')));
+		return editOriginalResponse(token, content(t('sync.no_server')));
 
 	const members = await getServerMembers(guild_id);
 	const mellow = members.find(member => member.user.id === DISCORD_APP_ID);
@@ -67,7 +67,8 @@ export default command(({ t, token, member, guild_id }) => defer(token, async ()
 	if (syncLogs.length)
 		await sendLogs(syncLogs, guild_id);
 
-	return editOriginalResponse(token, content(`successfully synced ${synced}/${members.length} server profiles`));
+	const other = members.length - synced;
+	return editOriginalResponse(token, content(`${t('forcesyncall.result', [synced])}${other ? t('forcesyncall.result.other', [other]) : ''}`));
 }, DiscordMessageFlag.Ephemeral), {
 	defaultMemberPermissions: '0'
 });

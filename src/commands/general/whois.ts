@@ -10,7 +10,7 @@ import { supabase, getServer, getUserByDiscordId } from '../../database.ts';
 export default command(({ t, token, guild_id }, { target }) => defer(token, async () => {
 	const server = await getServer(guild_id);
 	if (!server)
-		return editOriginalResponse(token, content(t('verify.no_server')));
+		return editOriginalResponse(token, content(t('sync.no_server')));
 
 	const user = await getUserByDiscordId(target.user.id as any);
 	if (user) {

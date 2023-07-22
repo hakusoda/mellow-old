@@ -108,12 +108,12 @@ export async function sendLogs(logs: Log[], serverId: string) {
 						title: t(`logging:type.${type}.title`, [data.member.user.global_name]),
 						fields: [
 							...rolesChanged ? [{
-								name: t('command:verify.complete.embed.roles'),
+								name: t('command:sync.complete.embed.roles'),
 								value: `\`\`\`diff\n${[...data.removedRoles.map(r => '- ' + r.name), ...data.addedRoles.map(r => '+ ' + r.name)].join('\n')}\`\`\``,
 								inline: true
 							}] : [],
 							...nickChanged ? [{
-								name: t('command:verify.complete.embed.nickname'),
+								name: t('command:sync.complete.embed.nickname'),
 								value: `\`\`\`diff\n${newNick ? `${oldNick ? `- ${oldNick}\n` : ''}+ ${newNick}` : `- ${oldNick}`}\`\`\``,
 								inline: true
 							}] : []

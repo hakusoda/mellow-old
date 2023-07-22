@@ -12,7 +12,7 @@ import type { User, TranslateFn, MellowServer, DiscordMember } from '../../types
 export default command(({ t, token, locale, member, guild_id }) => defer(token, async () => {
 	const server = await getServer(guild_id);
 	if (!server)
-		return editOriginalResponse(token, content(t('verify.no_server')));
+		return editOriginalResponse(token, content(t('sync.no_server')));
 
 	const user = await getUserByDiscordId(member!.user.id as any);
 	if (user)
@@ -29,7 +29,7 @@ export default command(({ t, token, locale, member, guild_id }) => defer(token, 
 	});
 	return editOriginalResponse(token, {
 		flags: DiscordMessageFlag.Ephemeral,
-		content: t('verify.signup'),
+		content: t('sync.signup'),
 		components: [{
 			type: 1,
 			components: [{
@@ -46,7 +46,7 @@ export async function verify(t: TranslateFn, executor: DiscordMember | null, ser
 	const userBind = await supabase.from('roblox_links').select('target_id').eq('owner', user.id).eq('type', 0).gte('flags', 2).limit(1).maybeSingle();
 	if (!userBind.data)
 		return editOriginalResponse(token, {
-			content: t('verify.signup'),
+			content: t('sync.signup'),
 			components: [{
 				type: 1,
 				components: [{
@@ -85,18 +85,18 @@ export async function verify(t: TranslateFn, executor: DiscordMember | null, ser
 		embeds: profileChanged ? [{
 			fields: [
 				...rolesChanged ? [{
-					name: t('verify.complete.embed.roles'),
+					name: t('sync.complete.embed.roles'),
 					value: `\`\`\`diff\n${[...removedRoles.map(r => '- ' + r.name), ...addedRoles.map(r => '+ ' + r.name)].join('\n')}\`\`\``,
 					inline: true
 				}] : [],
 				...nicknameChanged ? [{
-					name: t('verify.complete.embed.nickname'),
+					name: t('sync.complete.embed.nickname'),
 					value: `\`\`\`diff\n${newNickname ? `${member.nick ? `- ${member.nick}\n` : ''}+ ${newNickname}` : `- ${member.nick}`}\`\`\``,
 					inline: true
 				}] : []
 			]
 		}] : undefined,
-		content: t(`verify.complete.${profileChanged}`) + (rolesChanged ? nicknameChanged ? t('verify.complete.true.2') : t('verify.complete.true.0') : nicknameChanged ? t('verify.complete.true.1') : '') + t('verify.profile', [ruser]),
+		content: t(`sync.complete.${profileChanged}`) + (rolesChanged ? nicknameChanged ? t('sync.complete.true.2') : t('sync.complete.true.0') : nicknameChanged ? t('sync.complete.true.1') : '') + t('sync.profile', [ruser]),
 		components: []
 	});
 }
