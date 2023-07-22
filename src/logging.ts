@@ -132,10 +132,17 @@ export async function sendLogs(logs: Log[], serverId: string) {
 				}
 		}
 
-		if (embeds.length)
-			for (const chunk of splitArray(embeds, 10))
-				await createChannelMessage(server.data.logging_channel_id, {
-					embeds: chunk
-				});
+		try {
+			if (embeds.length)
+				for (const chunk of splitArray(embeds, 10))
+					await createChannelMessage(server.data.logging_channel_id, {
+						embeds: chunk
+					});
+		} catch (err) {
+			console.error(err);
+			await createChannelMessage(server.data.logging_channel_id, {
+				content: t('logging:error')
+			});
+		}
 	}
 }

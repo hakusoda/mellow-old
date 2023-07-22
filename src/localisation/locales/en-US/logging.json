@@ -2,5 +2,7 @@
 	"type.1": "Audit Log",
 	"type.2": "Server Profile Sync",
 	"type.2.title": "{{0}} synced their Server Profile",
-	"type.2.content": "They are currently syncing in this server as [{{0.roblox.displayName}}](https://www.roblox.com/users/{{0.roblox.id}}/profile)."
+	"type.2.content": "They are currently syncing in this server as [{{0.roblox.displayName}}](https://www.roblox.com/users/{{0.roblox.id}}/profile).",
+
+	"error": "## Something went wrong while processing logs..."
 }
