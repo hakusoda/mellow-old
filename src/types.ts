@@ -12,13 +12,14 @@ export interface User {
 	username: string
 	created_at: string
 	avatar_url: string
-	mellow_ids: string[]
 	primary_roblox_link_id: string | null
 }
 
 export interface MellowServer {
 	id: string
 	default_nickname: string
+	sync_unknown_users: boolean
+	allow_forced_syncing: boolean
 }
 export interface MellowBind {
 	id: string
@@ -70,7 +71,7 @@ type AuditLogLog = [MellowServerLogType.AuditLog, {
 }]
 type ServerProfileSyncLog = [MellowServerLogType.ServerProfileSync, {
 	member: DiscordMember
-	roblox: PartialRobloxUser
+	roblox?: PartialRobloxUser
 	nickname: [string | null, string | null]
 	addedRoles: DiscordRole[]
 	removedRoles: DiscordRole[]

@@ -15,6 +15,9 @@ export default command(({ t, token, member, guild_id }) => defer(token, async ()
 	if (!server)
 		return editOriginalResponse(token, content(t('sync.no_server')));
 
+	if (!server.allow_forced_syncing)
+		return editOriginalResponse(token, content(t('forcesync.disabled', [server])));
+
 	const members = await getServerMembers(guild_id);
 	const mellow = members.find(member => member.user.id === DISCORD_APP_ID);
 	if (!mellow)
@@ -35,32 +38,31 @@ export default command(({ t, token, member, guild_id }) => defer(token, async ()
 
 	const syncLogs: Log[] = [];
 	const mellowPosition = getMemberPosition(discordServer, mellow);
-	for (const user of users) {
-		const target = members.find(member => user.mellow_ids.includes(member.user.id));
-		if (target) {
-			const userLinks = links.filter(link => link.owner === user.id);
+	for (const target of members) {
+		const user = users.find(user => user.sub === target.user.id);
+		if (user || server.sync_unknown_users) {
+			const userLinks = user ? links.filter(link => link.owner === user.id) : [];
 			const robloxUser = robloxUsers.find(user => userLinks.some(link => link.target_id === user.id));
-			if (robloxUser) {
-				const {
+			const {
+				addedRoles,
+				removedRoles,
+				rolesChanged,
+		
+				newNickname,
+				nicknameChanged
+			} = await syncMember(member, server, serverLinks, discordServer, user, target, robloxUser, mellowPosition);
+			const profileChanged = rolesChanged || nicknameChanged;
+			if (profileChanged)
+				syncLogs.push([MellowServerLogType.ServerProfileSync, {
+					member: target,
+					roblox: robloxUser,
+					nickname: [target.nick, newNickname],
 					addedRoles,
-					removedRoles,
-					rolesChanged,
+					removedRoles
+				}]);
 			
-					newNickname,
-					nicknameChanged
-				} = await syncMember(member, server, serverLinks, discordServer, user, target, robloxUser, mellowPosition);
-				const profileChanged = rolesChanged || nicknameChanged;
-				if (profileChanged)
-					syncLogs.push([MellowServerLogType.ServerProfileSync, {
-						member: target,
-						roblox: robloxUser,
-						nickname: [target.nick, newNickname],
-						addedRoles,
-						removedRoles
-					}]);
-				
-				synced++;
-			}
+			synced++;
+			await new Promise(resolve => setTimeout(resolve, 500));
 		}
 	}
 

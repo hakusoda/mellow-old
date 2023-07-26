@@ -20,7 +20,8 @@ export const commands: Record<string, Command<any>> = {
 }
 export type CommandResponse = InteractionResponse | InteractionCallbackData | Promise<InteractionResponse | InteractionCallbackData>
 export interface Command<T extends readonly DiscordApplicationCommandOptions[]> {
-	execute: (payload: CommandExecutePayload, data: { [K in keyof T as T[K & number]['name']]: DiscordApplicationCommandOptionTypeMap[T[K]['type'] & number] }) => Response | Promise<Response> | CommandResponse
+	// typing for data is broken!!!
+	execute: (payload: CommandExecutePayload, data: { [K in keyof T as T[K & number]['name']]: ArgReq<DiscordApplicationCommandOptionTypeMap[T[K]['type'] & number], T[K]['required']> }) => Response | Promise<Response> | CommandResponse
 	options?: T
 	description?: string
 	defaultMemberPermissions?: string
@@ -31,7 +32,9 @@ export interface CommandOptions<T extends readonly DiscordApplicationCommandOpti
 	defaultMemberPermissions?: string
 }
 
-export function command<T extends readonly DiscordApplicationCommandOptions[]>(execute: Command<T>['execute'], options?: CommandOptions<T>): Command<T> {
+type ArgReq<T, J> = J extends true ? T : T | undefined
+
+export function command<const T extends readonly DiscordApplicationCommandOptions[]>(execute: Command<T>['execute'], options?: CommandOptions<T>): Command<T> {
 	return {
 		execute,
 		...options

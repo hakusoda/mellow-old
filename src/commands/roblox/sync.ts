@@ -42,9 +42,9 @@ export default command(({ t, token, locale, member, guild_id }) => defer(token, 
 	});
 }, DiscordMessageFlag.Ephemeral));
 
-export async function verify(t: TranslateFn, executor: DiscordMember | null, server: MellowServer, token: string, serverId: string, user: User, member: DiscordMember) {
-	const userBind = await supabase.from('roblox_links').select('target_id').eq('owner', user.id).eq('type', 0).gte('flags', 2).limit(1).maybeSingle();
-	if (!userBind.data)
+export async function verify(t: TranslateFn, executor: DiscordMember | null, server: MellowServer, token: string, serverId: string, user: User | undefined, member: DiscordMember, syncAs?: number) {
+	const userBind = user ? await supabase.from('roblox_links').select('target_id').eq('owner', user.id).eq('type', 0).gte('flags', 2).limit(1).maybeSingle() : null;
+	if (userBind && !userBind.data)
 		return editOriginalResponse(token, {
 			content: t('sync.signup'),
 			components: [{
@@ -58,7 +58,7 @@ export async function verify(t: TranslateFn, executor: DiscordMember | null, ser
 			}]
 		});
 
-	const [ruser] = await getRobloxUsers([userBind.data.target_id]);
+	const [ruser] = await getRobloxUsers([syncAs ?? userBind!.data!.target_id]);
 	const serverLinks = await getDiscordServerBinds(serverId);
 	const discordServer = (await getDiscordServer(serverId))!;
 	const position = getMemberPosition(discordServer, member);

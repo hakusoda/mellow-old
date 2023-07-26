@@ -8,8 +8,8 @@ export function getRobloxLink(linkId: string) {
 	return supabase.from('roblox_links').select('*').eq('id', linkId);
 }
 
-export async function getServer(serverId: string): Promise<MellowServer | null> {
-	return await supabase.from('mellow_servers').select('id, default_nickname').eq('id', serverId).limit(1).maybeSingle()
+export function getServer(serverId: string) {
+	return supabase.from('mellow_servers').select<string, MellowServer>('id, default_nickname, sync_unknown_users, allow_forced_syncing').eq('id', serverId).limit(1).maybeSingle()
 		.then(response => response.data);
 }
 
@@ -21,19 +21,20 @@ export async function getUser(userId: string): Promise<User | null> {
 }
 
 export async function getUserByDiscordId(userId: string) {
-	const { data, error } = await supabase.rpc('get_user_by_discord_user_id', {
+	/*const { data, error } = await supabase.rpc('get_user_by_discord_user_id', {
 		discord_user_id: userId
 	});
 	if (error)
 		console.error(error);
-	return error ? null : data;
+	return error ? null : data;*/
+	return getUsersByDiscordId([userId]).then(users => users[0] ?? null);
 }
 
 export async function getUsersByDiscordId(userIds: string[]) {
-	const { data, error } = await supabase.from('users').select('*').overlaps('mellow_ids', userIds);
+	const { data, error } = await supabase.from('user_connections').select('sub, user:users (*)').in('sub', userIds);
 	if (error)
 		console.error(error);
-	return error ? [] : data;
+	return error ? [] : data.map(user => ({ ...user.user as any as typeof data[number]['user'][number], sub: user.sub }));
 }
 
 export async function getDiscordServerBinds(serverId: string): Promise<MellowBind[]> {

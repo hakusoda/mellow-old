@@ -24,9 +24,11 @@
 	"sync.complete.embed.nickname": "Nickname Changes",
 	"sync.no_server": "## Cannot Sync Profile\nThis Discord Server is not connected to mellow, Roblox Syncing is not available.",
 	"sync.profile": "\nYou are currently syncing in this server as [{{0.displayName}}](https://www.roblox.com/users/{{0.id}}/profile).",
+	"sync.reconnect": "## Cannot Sync Profile\nYour account is currently connected to Discord via a legacy feature, please reconnect it [here](https://www.voxelified.com/settings/account/connections).",
 
 	"forcesync": "forcesync",
 	"forcesync.summary": "Forcefully sync someone's server profile.",
+	"forcesync.disabled": "## Cannot Sync Profile(s)\nSorry, forceful syncing has been disabled in this server, enable it [here](https://www.voxelified.com/mellow/server/{{0.id}}/settings/archive/audit-log).",
 
 	"forcesyncall": "forcesyncall",
 	"forcesyncall.summary": "Forcefully sync the profiles of everyone in this server.",
