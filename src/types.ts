@@ -73,6 +73,7 @@ type ServerProfileSyncLog = [MellowServerLogType.ServerProfileSync, {
 	member: DiscordMember
 	roblox?: PartialRobloxUser
 	nickname: [string | null, string | null]
+	forced_by: DiscordMember | null
 	addedRoles: DiscordRole[]
 	removedRoles: DiscordRole[]
 }]

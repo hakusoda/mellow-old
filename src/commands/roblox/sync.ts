@@ -77,6 +77,7 @@ export async function verify(t: TranslateFn, executor: DiscordMember | null, ser
 			member,
 			roblox: ruser,
 			nickname: [member.nick, newNickname],
+			forced_by: executor,
 			addedRoles,
 			removedRoles
 		}]], discordServer.id);

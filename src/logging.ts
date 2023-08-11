@@ -105,7 +105,7 @@ export async function sendLogs(logs: Log[], serverId: string) {
 
 					const nickChanged = oldNick !== newNick;
 					embeds.push({
-						title: t(`logging:type.${type}.title`, [data.member.user.global_name]),
+						title: t(`logging:type.${type}.title${data.forced_by ? '.forced' : ''}`, [data.member.user.global_name]),
 						fields: [
 							...rolesChanged ? [{
 								name: t('command:sync.complete.embed.roles'),
@@ -116,6 +116,10 @@ export async function sendLogs(logs: Log[], serverId: string) {
 								name: t('command:sync.complete.embed.nickname'),
 								value: `\`\`\`diff\n${newNick ? `${oldNick ? `- ${oldNick}\n` : ''}+ ${newNick}` : `- ${oldNick}`}\`\`\``,
 								inline: true
+							}] : [],
+							...data.forced_by ? [{
+								name: t(`logging:type.${type}.forced`),
+								value: `<@${data.forced_by.user.id}>`
 							}] : []
 						],
 						author: {

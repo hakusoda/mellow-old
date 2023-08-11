@@ -57,6 +57,7 @@ export default command(({ t, token, member, guild_id }) => defer(token, async ()
 					member: target,
 					roblox: robloxUser,
 					nickname: [target.nick, newNickname],
+					forced_by: member,
 					addedRoles,
 					removedRoles
 				}]);
