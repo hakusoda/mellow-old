@@ -87,7 +87,7 @@ async function meetsLink(user: User | undefined, { type, requirements, requireme
 					met = true;
 			} else if (item.type === MellowLinkRequirementType.HasVerifiedUserLink) {
 				/*if (user) {
-					const { data, error } = await supabase.from('roblox_links').select('flags').eq('owner', user.id);
+					const { data, error } = await supabase.from('roblox_links').select('flags').eq('owner_id', user.id);
 					if (error)
 						throw error;
 					met = data.some(link => hasFlag(link.flags, RobloxLinkFlag.Verified));

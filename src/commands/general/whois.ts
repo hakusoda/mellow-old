@@ -22,7 +22,7 @@ export default command(({ t, token, guild_id }, { target }) => defer(token, asyn
 				value: roles.join(' • ')
 			});
 
-		const robloxLinks = await supabase.from('roblox_links').select('id, target_id').eq('owner', user.id).eq('type', 0).gte('flags', 2);
+		const robloxLinks = await supabase.from('roblox_links').select('id, target_id').eq('owner_id', user.id).eq('type', 0).gte('flags', 2);
 		if (robloxLinks.data?.length) {
 			const users = await getRobloxUsers(robloxLinks.data.map(link => link.target_id));
 			const primaryLink = user.primary_roblox_link_id ? robloxLinks.data.find(link => link.id === user.primary_roblox_link_id) ?? robloxLinks.data[0] : robloxLinks.data[0];
