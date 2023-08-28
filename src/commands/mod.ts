@@ -7,6 +7,7 @@ import { overwriteGlobalCommands } from '../discord.ts';
 import { DiscordApplicationCommandOptionType } from '../enums.ts';
 import type { DiscordInteraction, CommandExecutePayload, DiscordApplicationCommandOptions, DiscordApplicationCommandOptionTypeMap, DiscordApplicationIntegerNumberCommandOption } from '../types.ts';
 
+import { setup } from './other/mod.ts';
 import { ping, roll, whois, pokemon } from './general/mod.ts';
 import { sync, forcesync, forcesyncall } from './roblox/mod.ts';
 export const commands: Record<string, Command<any>> = {
@@ -14,6 +15,7 @@ export const commands: Record<string, Command<any>> = {
 	roll,
 	sync,
 	whois,
+	setup,
 	pokemon,
 	forcesync,
 	forcesyncall

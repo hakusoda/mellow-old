@@ -39,6 +39,12 @@
 	"forcesyncall.result": "## Successfully synced {{0}} Server Profiles",
 	"forcesyncall.result.other": "\nUnfortunately {{0}} other people couldn't be synced, perhaps they aren't connected to mellow...",
 
+	"setup": "setup",
+	"setup.summary": "Connect this Discord Server to mellow.",
+	"setup.signup": "## Account required\nBefore you can continue, you need to [sign-up](https://www.voxelified.com/sign-up) for a Voxelified Account.\nAfter that, if you did not sign-up with Discord, please connect your account [here](https://www.voxelified.com/settings/account/connections).\nExecute this command again after completing these instructions.",
+	"setup.exists": "## Server already connected\nThis server is already connected to mellow, view it [here](https://www.voxelified.com/mellow/server/{{0}}/settings).",
+	"setup.done": "## Server connected\nThis server is now connected to mellow!\nConfigure it online [here](https://www.voxelified.com/mellow/server/{{0}}/settings).",
+
 	"whois": "profile",
 	"whois.summary": "Request someone's Voxelified Profile.",
 	"whois.empty_bio": "This user hasn't written a bio yet...",
@@ -51,6 +57,7 @@
 	"placeholder.summary": "this description does not exist 🦑",
 
 	"error.unknown": "An unknown internal error occurred.",
+	"error.database": "An unexpected error occurred while accessing our database, please try again later.",
 	"error.no_permission": "you are not cool enough 🦑",
 	"error.invalid_request": "invalid request received from discord"
 }
