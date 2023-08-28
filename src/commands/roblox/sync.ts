@@ -56,7 +56,7 @@ export async function verify(t: TranslateFn, executor: DiscordMember | null, ser
 			return response.data?.primary as any ?? response.data?.roblox_links[0];
 		})
 	: null;
-	if (!userBind)
+	if (!userBind && !server.sync_unknown_users)
 		return editOriginalResponse(token, {
 			content: t('sync.signup'),
 			components: [{
@@ -70,11 +70,14 @@ export async function verify(t: TranslateFn, executor: DiscordMember | null, ser
 			}]
 		});
 
-	const [ruser] = await getRobloxUsers([syncAs ?? userBind.target_id]);
+	const robloxId = syncAs ?? userBind?.target_id;
+	const [ruser] = robloxId ? await getRobloxUsers([robloxId]) : [undefined];
 	const serverLinks = await getDiscordServerBinds(serverId);
 	const discordServer = (await getDiscordServer(serverId))!;
 	const position = getMemberPosition(discordServer, member);
 	const {
+		banned,
+		kicked,
 		addedRoles,
 		removedRoles,
 		rolesChanged,
@@ -84,8 +87,10 @@ export async function verify(t: TranslateFn, executor: DiscordMember | null, ser
 	 } = await syncMember(null, server, serverLinks, discordServer, user, member, ruser, position);
 
 	const profileChanged = rolesChanged || nicknameChanged;
-	if (profileChanged)
+	if (profileChanged || banned || kicked)
 		await sendLogs([[MellowServerLogType.ServerProfileSync, {
+			banned,
+			kicked,
 			member,
 			roblox: ruser,
 			nickname: [member.nick, newNickname],
@@ -94,6 +99,7 @@ export async function verify(t: TranslateFn, executor: DiscordMember | null, ser
 			removedRoles
 		}]], discordServer.id);
 
+	const removed = banned || kicked;
 	return editOriginalResponse(token, {
 		embeds: profileChanged ? [{
 			fields: [
@@ -108,8 +114,8 @@ export async function verify(t: TranslateFn, executor: DiscordMember | null, ser
 					inline: true
 				}] : []
 			]
-		}] : undefined,
-		content: t(`sync.complete.${profileChanged}`) + (rolesChanged ? nicknameChanged ? t('sync.complete.true.2') : t('sync.complete.true.0') : nicknameChanged ? t('sync.complete.true.1') : '') + t('sync.profile', [ruser]),
+		}] : [],
+		content: removed ? t('sync.complete.removed') + t(`sync.complete.removed.${banned ? 0 : 1}`) : t(`sync.complete.${profileChanged}`) + (rolesChanged ? nicknameChanged ? t('sync.complete.true.2') : t('sync.complete.true.0') : nicknameChanged ? t('sync.complete.true.1') : '') + t('sync.profile', [ruser]),
 		components: []
 	});
 }

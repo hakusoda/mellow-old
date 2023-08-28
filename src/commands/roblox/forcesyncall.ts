@@ -51,6 +51,8 @@ export default command(({ t, token, member, guild_id }) => defer(token, async ()
 			const userLinks = user ? links.filter(link => link.owner_id === user.id) : [];
 			const robloxUser = robloxUsers.find(user => userLinks.some(link => link.target_id === user.id));
 			const {
+				banned,
+				kicked,
 				addedRoles,
 				removedRoles,
 				rolesChanged,
@@ -59,8 +61,10 @@ export default command(({ t, token, member, guild_id }) => defer(token, async ()
 				nicknameChanged
 			} = await syncMember(member, server, serverLinks, discordServer, user, target, robloxUser, mellowPosition);
 			const profileChanged = rolesChanged || nicknameChanged;
-			if (profileChanged)
+			if (profileChanged || banned || kicked)
 				syncLogs.push([MellowServerLogType.ServerProfileSync, {
+					banned,
+					kicked,
 					member: target,
 					roblox: robloxUser,
 					nickname: [target.nick, newNickname],

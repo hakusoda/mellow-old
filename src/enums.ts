@@ -1,5 +1,7 @@
-export enum MellowLinkType {
-	Role
+export enum MellowServerProfileActionType {
+	GiveDiscordRoles,
+	BanDiscord,
+	KickDiscord
 }
 export enum MellowLinkRequirementType {
 	HasVerifiedUserLink,

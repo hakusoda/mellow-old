@@ -45,11 +45,6 @@ export async function sendLogs(logs: Log[], serverId: string) {
 								value: `\`\`\`diff\n- ${data.data.type[0]}\n+ ${data.data.type[1]}\`\`\``,
 								inline: true
 							});
-						if (data.data.target_ids)
-							fields.push({
-								name: t('server_audit_log.type.4.target_ids'),
-								value: `${data.data.target_ids} Targets`
-							});
 						if (data.data.requirements)
 							fields.push({
 								name: t('server_audit_log.type.4.requirements'),
@@ -81,8 +76,7 @@ export async function sendLogs(logs: Log[], serverId: string) {
 								name: t('server_audit_log.type.2.default_nickname'),
 								value: `\`\`\`diff\n${oldNick ? `- ${oldNick}\n` : ''}${newNick ? `+ ${newNick}` : ''}\`\`\``
 							});
-					}
-					if (data.target_link_id)
+					} else if (data.target_link_id)
 						description = t('view_roblox_link', [data]);
 
 					embeds.push({
@@ -104,8 +98,15 @@ export async function sendLogs(logs: Log[], serverId: string) {
 					const [oldNick, newNick] = data.nickname;
 
 					const nickChanged = oldNick !== newNick;
+
+					let title = t(`logging:type.${type}.title${data.forced_by ? '.forced' : ''}`, [data.member.user.global_name]);
+					let description = t(`logging:type.${type}.content`, [data]);
+					if (data.banned || data.kicked) {
+						title = `${data.member.user.global_name} ${t('command:sync.complete.removed2')}`;
+						description = t('command:sync.complete.removed') + t(`command:sync.complete.removed.${data.banned ? 0 : 1}`);
+					}
 					embeds.push({
-						title: t(`logging:type.${type}.title${data.forced_by ? '.forced' : ''}`, [data.member.user.global_name]),
+						title,
 						fields: [
 							...rolesChanged ? [{
 								name: t('command:sync.complete.embed.roles'),
@@ -131,7 +132,7 @@ export async function sendLogs(logs: Log[], serverId: string) {
 							text: t(`logging:type.${type}`)
 						},
 						timestamp: new Date().toISOString(),
-						description: t(`logging:type.${type}.content`, [data])
+						description
 					});
 				}
 		}

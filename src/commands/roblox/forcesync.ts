@@ -15,7 +15,7 @@ export default command(({ t, token, member, guild_id }, { target, as }) => defer
 		return editOriginalResponse(token, content(t('forcesync.disabled', [server])));
 
 	const user = await getUserByDiscordId((target as any).user.id as any);
-	if (user || as)
+	if (user || as || server.sync_unknown_users)
 		return verify(t, member, server, token, guild_id, user, target as any, as as any);
 
 	return editOriginalResponse(token, content('user is not real'));

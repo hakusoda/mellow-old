@@ -39,7 +39,6 @@ export default async (request: Request) => {
 		case DiscordInteractionType.Ping:
 			return json({ type: InteractionResponseTypes.Pong });
 		case DiscordInteractionType.ApplicationCommand: {
-			console.log(payload);
 			if (!payload.data?.name)
 				return channelResponse(text('error.invalid_request')(payload));
 

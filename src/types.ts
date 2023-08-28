@@ -1,4 +1,4 @@
-import type { MellowLinkType, DiscordChannelType, MellowServerLogType, DiscordInteractionType, CustomCommandActionType, MellowServerAuditLogType, MellowLinkRequirementType, MellowLinkRequirementsType, CustomCommandActionParentType, DiscordApplicationCommandOptionType } from './enums.ts';
+import type { MellowServerProfileActionType, DiscordChannelType, MellowServerLogType, DiscordInteractionType, CustomCommandActionType, MellowServerAuditLogType, MellowLinkRequirementType, MellowLinkRequirementsType, CustomCommandActionParentType, DiscordApplicationCommandOptionType } from './enums.ts';
 export interface RobloxLink {
 	id: string
 	owner: string
@@ -23,9 +23,10 @@ export interface MellowServer {
 }
 export interface MellowBind {
 	id: string
-	type: MellowLinkType
+	name: string
+	type: MellowServerProfileActionType
 
-	target_ids: string[]
+	data: string[]
 
 	requirements: {
 		id: string
@@ -52,6 +53,8 @@ export interface CustomCommandAction {
 }
 
 export interface RobloxServerProfileSyncResult {
+	banned: boolean
+	kicked: boolean
 	addedRoles: DiscordRole[]
 	rolesChanged: boolean
 	removedRoles: DiscordRole[]
@@ -70,6 +73,8 @@ type AuditLogLog = [MellowServerLogType.AuditLog, {
 	target_link_id: string
 }]
 type ServerProfileSyncLog = [MellowServerLogType.ServerProfileSync, {
+	banned: boolean
+	kicked: boolean
 	member: DiscordMember
 	roblox?: PartialRobloxUser
 	nickname: [string | null, string | null]

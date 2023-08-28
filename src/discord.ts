@@ -4,14 +4,15 @@ import type { InteractionCallbackData, DiscordCreateApplicationCommand } from 'd
 
 export function makeRequest<T = any>(path: string, options: RequestInit = {}): Promise<{ success: false } | { data: T, success: true }> {
 	options.headers = {
+		accept: 'application/json',
 		authorization: `Bot ${DISCORD_TOKEN}`,
-		'content-type': 'application/json',
+		'content-type': options.body ? 'application/json' : undefined,
 		...options.headers
 	};
 	return fetch(API_BASE + path, options)
 		.then(async response => {
-			if (response.status === 200)
-				return { data: await response.json(), success: true };
+			if (response.status > 199 && response.status < 400)
+				return { data: await response.json().catch(() => null), success: true };
 			console.error(response.status, await response.text().catch(() => ''));
 			return { success: false };
 		});
@@ -60,6 +61,30 @@ export function modifyMember(serverId: string, userId: string, options: DiscordM
 		method: 'PATCH',
 		headers: reason ? {
 			'x-audit-log-reason': reason
+		} : undefined
+	}).then(response => {
+		if (!response.success)
+			throw new Error();
+	})
+}
+
+export function banMember(serverId: string, userId: string, reason?: string) {
+	return makeRequest(`/guilds/${serverId}/bans/${userId}`, {
+		method: 'PUT',
+		headers: reason ? {
+			'x-audit-log-reason': encodeURIComponent(reason)
+		} : undefined
+	}).then(response => {
+		if (!response.success)
+			throw new Error();
+	})
+}
+
+export function kickMember(serverId: string, userId: string, reason?: string) {
+	return makeRequest(`/guilds/${serverId}/members/${userId}`, {
+		method: 'DELETE',
+		headers: reason ? {
+			'x-audit-log-reason': encodeURIComponent(reason)
 		} : undefined
 	}).then(response => {
 		if (!response.success)
