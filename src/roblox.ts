@@ -81,9 +81,9 @@ export async function syncMember(executor: DiscordMember | null, server: MellowS
 	return {
 		banned,
 		kicked,
-		addedRoles: removed ? addedRoles : [],
+		addedRoles: removed ? [] : addedRoles,
 		newNickname: nickname,
-		removedRoles: removed ? removedRoles : [],
+		removedRoles: removed ? [] : removedRoles,
 		rolesChanged: rolesChanged && !removed,
 		nicknameChanged: nickChanged && !removed
 	};
