@@ -203,6 +203,45 @@ export interface DiscordInteraction {
 	entitlement_sku_ids: unknown[]
 }
 
+// https://discord.com/developers/docs/resources/channel#channel-object-channel-structure
+export interface DiscordChannel {
+	id: string
+	nsfw: boolean
+	type: DiscordChannelType
+	name?: string | null
+	icon?: string | null
+	flags?: number
+	topic?: string | null
+	member?: unknown
+	bitrate?: number
+	managed?: boolean
+	owner_id?: string
+	guild_id?: string
+	position?: number
+	parent_id?: string | null
+	user_limit?: number
+	recipients?: unknown[]
+	rtc_region?: string | null
+	permissions?: string
+	member_count?: number
+	applied_tags?: string[]
+	message_count?: number
+	application_id?: string
+	available_tags?: unknown[]
+	thread_metadata?: unknown
+	last_message_id?: string | null
+	total_message_sent?: number
+	video_quality_mode?: number
+	last_pin_timestamp?: string | null
+	default_sort_order?: number | null
+	rate_limit_per_user?: number
+	default_forum_layout?: number
+	permission_overwrites?: unknown[]
+	default_reaction_emoji?: string[]
+	default_auto_archive_duration?: number
+	default_thread_rate_limit_per_user?: number
+}
+
 // https://discord.com/developers/docs/resources/guild#modify-guild-member-json-params
 export interface DiscordModifyMemberOptions {
 	nick?: string | null

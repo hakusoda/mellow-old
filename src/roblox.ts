@@ -1,5 +1,8 @@
-import { banMember, kickMember, modifyMember, getMemberPosition } from './discord.ts';
+import { getFixedT } from 'i18next';
+
+import { content } from './commands/response.ts';
 import { MellowLinkRequirementType, MellowLinkRequirementsType, MellowServerProfileActionType } from './enums.ts';
+import { banMember, kickMember, modifyMember, upsertUserChannel, getMemberPosition, createChannelMessage } from './discord.ts';
 import type { User, MellowBind, DiscordRole, MellowServer, DiscordGuild, DiscordMember, PartialRobloxUser, RobloxUsersResponse, RobloxUserRolesResponse, RobloxServerProfileSyncResult } from './types.ts';
 export function getRobloxUsers(userIds: (string | number)[]) {
 	return fetch(`https://users.roblox.com/v1/users`, {
@@ -62,11 +65,13 @@ export async function syncMember(executor: DiscordMember | null, server: MellowS
 			if (value && !banned) {
 				removed = banned = true;
 				await banMember(server.id, member.user.id, `Banned due to meeting the requirements of "${link.name}"${link.data[0] ? `.\n${link.data[0]}` : ''}`);
+				await notifyMemberOfRemoval(member.user.id, discordServer, 1, link.data[1]);
 			}
 		} else if (link.type === MellowServerProfileActionType.KickDiscord) {
 			if (value && !removed) {
 				removed = kicked = true;
 				await kickMember(server.id, member.user.id, `Kicked due to meeting the requirements of "${link.name}"${link.data[0] ? `.\n${link.data[0]}` : ''}`);
+				await notifyMemberOfRemoval(member.user.id, discordServer, 0, link.data[1]);
 			}
 		}
 	}
@@ -126,4 +131,11 @@ async function meetsLink(user: User | undefined, { type, requirements, requireme
 	}
 
 	return metRequirements === requirements.length || (requiresOne && !!metRequirements);
+}
+
+async function notifyMemberOfRemoval(userId: string, server: DiscordGuild, type: 0 | 1, reason?: string) {
+	const t = await getFixedT(server.preferred_locale, 'common');
+	const channel = await upsertUserChannel(userId);
+	if (channel)
+		await createChannelMessage(channel.id, content(`${t('direct_message.removal', [server.name])}${t(`direct_message.type.${type}`)}${reason ? t('direct_message.reason', [reason]) : ''}${t('direct_message.footer')}`));
 }

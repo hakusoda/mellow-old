@@ -25,6 +25,12 @@
 	"mellow_server_logging_type.1": "Mellow Audit Log",
 	"mellow_server_logging_type.2": "Server Profile Sync",
 
+	"direct_message.removal": "# You have been removed from {{0}}\n",
+	"direct_message.type.0": "You have been kicked for meeting the requirements of a server profile action.",
+	"direct_message.type.1": "You have been banned for meeting the requirements of a server profile action.",
+	"direct_message.reason": "\n### Provided Reason: \"{{0}}\"",
+	"direct_message.footer": "\n\nIf you believe this was a mistake, contact server staff if possible.\nIf you believe we got this wrong, please [contact support](<https://discord.com/invite/rs3r4dQu9P>).",
+
 	"user_flag.2": "Staff",
 	"user_flag.4": "Tester"
 }

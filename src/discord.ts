@@ -1,6 +1,6 @@
 import { DISCORD_TOKEN, DISCORD_APP_ID } from './util/constants.ts';
-import type { DiscordRole, DiscordGuild, DiscordMember, DiscordModifyMemberOptions } from './types.ts';
 import type { InteractionCallbackData, DiscordCreateApplicationCommand } from 'discordeno';
+import type { DiscordRole, DiscordGuild, DiscordMember, DiscordChannel, DiscordModifyMemberOptions } from './types.ts';
 
 export function makeRequest<T = any>(path: string, options: RequestInit = {}): Promise<{ success: false } | { data: T, success: true }> {
 	options.headers = {
@@ -90,6 +90,13 @@ export function kickMember(serverId: string, userId: string, reason?: string) {
 		if (!response.success)
 			throw new Error();
 	})
+}
+
+export function upsertUserChannel(userId: string) {
+	return makeRequest<DiscordChannel>('/users/@me/channels', {
+		body: JSON.stringify({ recipient_id: userId }),
+		method: 'POST'
+	}).then(response => response.success ? response.data : null);
 }
 
 export function getDiscordServer(serverId: string) {
