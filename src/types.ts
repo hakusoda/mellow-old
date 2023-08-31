@@ -17,6 +17,13 @@ export interface User {
 
 export interface MellowServer {
 	id: string
+	webhooks: {
+		events: number
+		enabled: boolean
+		target_url: string
+		request_method: string
+		request_headers: Record<string, string>
+	}[]
 	default_nickname: string
 	sync_unknown_users: boolean
 	allow_forced_syncing: boolean

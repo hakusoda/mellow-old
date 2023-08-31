@@ -9,8 +9,12 @@ export function getRobloxLink(linkId: string) {
 }
 
 export function getServer(serverId: string) {
-	return supabase.from('mellow_servers').select<string, MellowServer>('id, default_nickname, sync_unknown_users, allow_forced_syncing').eq('id', serverId).limit(1).maybeSingle()
-		.then(response => response.data);
+	return supabase.from('mellow_servers').select<string, MellowServer>('id, default_nickname, sync_unknown_users, allow_forced_syncing, webhooks:mellow_server_webhooks ( events, enabled, target_url, request_method, request_headers )').eq('id', serverId).limit(1).maybeSingle()
+		.then(response => {
+			if (response.error)
+				throw response.error;
+			return response.data;
+		});
 }
 
 export async function getUser(userId: string): Promise<User | null> {

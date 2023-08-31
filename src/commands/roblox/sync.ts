@@ -84,7 +84,7 @@ export async function verify(t: TranslateFn, executor: DiscordMember | null, ser
 
 		newNickname,
 		nicknameChanged
-	 } = await syncMember(null, server, serverLinks, discordServer, user, member, ruser, position);
+	 } = await syncMember(executor, server, serverLinks, discordServer, user, member, ruser, position);
 
 	const profileChanged = rolesChanged || nicknameChanged;
 	if (profileChanged || banned || kicked)

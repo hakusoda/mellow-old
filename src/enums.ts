@@ -31,6 +31,11 @@ export enum MellowServerLogType {
 	ServerProfileSync = 1 << 1
 }
 
+export enum MellowServerAuditLogActionType {
+	None,
+	RobloxServerProfileSync = 1 << 0
+}
+
 export enum RobloxLinkFlag {
 	None,
 	Verified = 1 << 1
