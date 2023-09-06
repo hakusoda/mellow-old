@@ -65,14 +65,14 @@ export async function syncMember(executor: DiscordMember | null, server: MellowS
 		} else if (link.type === MellowServerProfileActionType.BanDiscord) {
 			if (value && !banned) {
 				removed = banned = true;
-				await banMember(server.id, member.user.id, `Banned due to meeting the requirements of "${link.name}"${link.data[0] ? `.\n${link.data[0]}` : ''}`);
 				await notifyMemberOfRemoval(member.user.id, discordServer, 1, link.data[1]);
+				await banMember(server.id, member.user.id, `Banned due to meeting the requirements of "${link.name}"${link.data[0] ? `.\n${link.data[0]}` : ''}`);
 			}
 		} else if (link.type === MellowServerProfileActionType.KickDiscord) {
 			if (value && !removed) {
 				removed = kicked = true;
-				await kickMember(server.id, member.user.id, `Kicked due to meeting the requirements of "${link.name}"${link.data[0] ? `.\n${link.data[0]}` : ''}`);
 				await notifyMemberOfRemoval(member.user.id, discordServer, 0, link.data[1]);
+				await kickMember(server.id, member.user.id, `Kicked due to meeting the requirements of "${link.name}"${link.data[0] ? `.\n${link.data[0]}` : ''}`);
 			}
 		}
 	}
@@ -160,5 +160,6 @@ async function notifyMemberOfRemoval(userId: string, server: DiscordGuild, type:
 	const t = await getFixedT(server.preferred_locale, 'common');
 	const channel = await upsertUserChannel(userId);
 	if (channel)
-		await createChannelMessage(channel.id, content(`${t('direct_message.removal', [server.name])}${t(`direct_message.type.${type}`)}${reason ? t('direct_message.reason', [reason]) : ''}${t('direct_message.footer')}`));
+		await createChannelMessage(channel.id, content(`${t('direct_message.removal', [server.name])}${t(`direct_message.type.${type}`)}${reason ? t('direct_message.reason', [reason]) : ''}${t('direct_message.footer')}`))
+			.catch(console.error);
 }
