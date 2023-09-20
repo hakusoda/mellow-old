@@ -33,7 +33,7 @@ export default command(({ t, token, locale, member, guild_id }) => defer(token, 
 		components: [{
 			type: 1,
 			components: [{
-				url: 'https://discord.com/api/oauth2/authorize?client_id=1068554282481229885&redirect_uri=https%3A%2F%2Fwebsite-dev-tunnel.voxelified.com%2Fcreate-account%2Fdiscord&response_type=code&scope=identify',
+				url: 'https://discord.com/api/oauth2/authorize?client_id=1068554282481229885&redirect_uri=https%3A%2F%2Fwww.voxelified.com%2Fcreate-account%2Fdiscord&response_type=code&scope=identify',
 				type: 2,
 				style: 5,
 				label: t('common:action.continue')
