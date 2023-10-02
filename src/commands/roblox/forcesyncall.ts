@@ -32,7 +32,7 @@ export default command(({ t, token, member, guild_id }) => defer(token, async ()
 		.then(response => {
 			if (response.error)
 				console.error(response.error);
-			return response.data?.map(item => item.primary as any ?? item.roblox_links[0]) ?? [];
+			return response.data?.map(item => item.primary as any ?? item.roblox_links[0]).filter(i => i) ?? [];
 		});
 
 	const robloxUsers = await getRobloxUsers(links.map(link => link.target_id));

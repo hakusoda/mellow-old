@@ -4,6 +4,7 @@
 		"i18next": "https://deno.land/x/i18next@v22.4.8/index.js",
 		"discordeno": "https://deno.land/x/discordeno@17.0.1/mod.ts",
 		"supabase-js": "https://esm.sh/@supabase/supabase-js@2.24.0",
-		"permission-plugin": "https://deno.land/x/discordeno_permissions_plugin@0.0.15/mod.ts"
+		"permission-plugin": "https://deno.land/x/discordeno_permissions_plugin@0.0.15/mod.ts",
+		"@voxelified/roblox-open-cloud": "https://esm.sh/@voxelified/roblox-open-cloud@0.0.2"
 	}
 }

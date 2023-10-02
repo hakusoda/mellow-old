@@ -15,8 +15,12 @@ export default command(({ t, token, locale, member, guild_id }) => defer(token, 
 		return editOriginalResponse(token, content(t('sync.no_server')));
 
 	const user = await getUserByDiscordId(member!.user.id as any);
+	console.log(user);
 	if (user)
 		return verify(t, null, server, token, guild_id, user, member!);
+		/*return editOriginalResponse(token, {
+			content: 'うぁぁ…。よい…！！'
+		});*/
 
 	supabase.from('mellow_signups').upsert({
 		locale,

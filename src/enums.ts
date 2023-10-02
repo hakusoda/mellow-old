@@ -9,7 +9,13 @@ export enum MellowLinkRequirementType {
 	HasRobloxGroupRankInRange,
 	InRobloxGroup,
 	IsFriendsWith,
-	MeetsOtherLink
+	MeetsOtherLink,
+	VoxelifiedInTeam,
+	SteamInGroup,
+	RobloxHasAsset,
+	RobloxHasBadge,
+	RobloxHasPass,
+	GitHubInOrganisation
 }
 export enum MellowLinkRequirementsType {
 	MeetAll,

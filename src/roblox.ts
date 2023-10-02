@@ -1,10 +1,15 @@
 import { getFixedT } from 'i18next';
+import type { InventoryItem } from '@voxelified/roblox-open-cloud';
+import { OpenCloudClient, OpenCloudApiKey } from '@voxelified/roblox-open-cloud';
 
 import { hasFlag } from './util/mod.ts';
 import { content } from './commands/response.ts';
+import { ROBLOX_OPEN_CLOUD_API_KEY } from './util/constants.ts';
 import { banMember, kickMember, modifyMember, upsertUserChannel, getMemberPosition, createChannelMessage } from './discord.ts';
 import { MellowLinkRequirementType, MellowLinkRequirementsType, MellowServerProfileActionType, MellowServerAuditLogActionType } from './enums.ts';
 import type { User, MellowBind, DiscordRole, MellowServer, DiscordGuild, DiscordMember, PartialRobloxUser, RobloxUsersResponse, RobloxUserRolesResponse, RobloxServerProfileSyncResult } from './types.ts';
+
+const openCloud = new OpenCloudClient(new OpenCloudApiKey(ROBLOX_OPEN_CLOUD_API_KEY));
 export function getRobloxUsers(userIds: (string | number)[]) {
 	return fetch(`https://users.roblox.com/v1/users`, {
 		body: JSON.stringify({
@@ -23,6 +28,7 @@ export function getRobloxUserRoles(userId: string | number) {
 		.then(data => (data as RobloxUserRolesResponse).data);
 }
 
+// TODO: rewrite! please! pretty please! .·´¯`(>▂<)´¯`·. 
 export async function syncMember(executor: DiscordMember | null, server: MellowServer, serverLinks: MellowBind[], discordServer: DiscordGuild, user: User | undefined, member: DiscordMember, robloxUser: PartialRobloxUser | undefined, mellowPosition: number): Promise<RobloxServerProfileSyncResult> {
 	let roles = [...member.roles];
 	let nickname = member.nick;
@@ -38,13 +44,32 @@ export async function syncMember(executor: DiscordMember | null, server: MellowS
 
 	const robloxRoles = robloxUser && serverLinks.some(bind => bind.requirements.some(r => r.type === MellowLinkRequirementType.HasRobloxGroupRole || r.type === MellowLinkRequirementType.HasRobloxGroupRankInRange)) ? await getRobloxUserRoles(robloxUser.id) : [];
 	
+	const robloxInventoryAssets = serverLinks.flatMap(action => action.requirements.filter(r => r.type === MellowLinkRequirementType.RobloxHasAsset)).map(item => item.data[0]);
+	const robloxInventoryBadges = serverLinks.flatMap(action => action.requirements.filter(r => r.type === MellowLinkRequirementType.RobloxHasBadge)).map(item => item.data[0]);
+	const robloxInventoryPasses = serverLinks.flatMap(action => action.requirements.filter(r => r.type === MellowLinkRequirementType.RobloxHasPass)).map(item => item.data[0]);
+	
+	let inventoryFilter: [string, string][] = [];
+	if (robloxInventoryAssets.length)
+		inventoryFilter.push(['assetIds', robloxInventoryAssets.join(',')]);
+	if (robloxInventoryBadges.length)
+		inventoryFilter.push(['badgeIds', robloxInventoryBadges.join(',')]);
+	if (robloxInventoryPasses.length)
+		inventoryFilter.push(['gamePassIds', robloxInventoryPasses.join(',')]);
+	const robloxInventoryItems = robloxUser && inventoryFilter.length ?
+		await openCloud.users.getInventoryItems(
+			robloxUser.id,
+			100,
+			inventoryFilter.map(i => `${i[0]}=${i[1]}`).join(';')
+		)
+	: [];
+
 	const metTypeReqs = serverLinks.flatMap(link => link.requirements.filter(r => r.type === MellowLinkRequirementType.MeetsOtherLink));
 	const metTypeLinks = serverLinks.filter(link => metTypeReqs.find(item => item.data[0] === link.id));
 	const requirementsCache: Record<string, boolean> = {};
 	
 	let removed = false, kicked = false, banned = false;
 	for (const link of serverLinks) {
-		const value = await meetsLink(user, link, robloxRoles, requirementsCache, metTypeLinks, robloxUser);
+		const value = await meetsLink(user, link, robloxRoles, requirementsCache, metTypeLinks, robloxInventoryItems.inventoryItems, robloxUser);
 		if (link.type === MellowServerProfileActionType.GiveDiscordRoles) {
 			if (value) {
 				if (!link.data.every(id => member!.roles.includes(id))) {
@@ -96,8 +121,8 @@ export async function syncMember(executor: DiscordMember | null, server: MellowS
 						forced_by: executor ? {
 							id: executor.user.id
 						} : null,
-						added_roles: removed ? [] : addedRoles.map(mapRoleForWebhook),
-						removed_roles: removed ? [] : removedRoles.map(mapRoleForWebhook)
+						added_roles: removed ? [] : addedRoles.filter(i => i).map(mapRoleForWebhook),
+						removed_roles: removed ? [] : removedRoles.filter(i => i).map(mapRoleForWebhook)
 					}
 				}),
 				method: webhook.request_method,
@@ -107,9 +132,9 @@ export async function syncMember(executor: DiscordMember | null, server: MellowS
 	return {
 		banned,
 		kicked,
-		addedRoles: removed ? [] : addedRoles,
+		addedRoles: removed ? [] : addedRoles.filter(i => i),
 		newNickname: nickname,
-		removedRoles: removed ? [] : removedRoles,
+		removedRoles: removed ? [] : removedRoles.filter(i => i),
 		rolesChanged: rolesChanged && !removed,
 		nicknameChanged: nickChanged && !removed
 	};
@@ -117,26 +142,19 @@ export async function syncMember(executor: DiscordMember | null, server: MellowS
 
 const mapRoleForWebhook = (role: DiscordRole) => ({ id: role.id, name: role.id });
 
-async function meetsLink(user: User | undefined, { type, requirements, requirements_type }: MellowBind, robloxRoles: RobloxUserRolesResponse['data'], requirementsCache: Record<string, boolean>, metTypeLinks: MellowBind[], robloxUser?: PartialRobloxUser) {
+// TODO: rewrite! please! pretty please! .·´¯`(>▂<)´¯`·. 
+async function meetsLink(user: User | undefined, { type, requirements, requirements_type }: MellowBind, robloxRoles: RobloxUserRolesResponse['data'], requirementsCache: Record<string, boolean>, metTypeLinks: MellowBind[], robloxInventoryItems: InventoryItem[], robloxUser?: PartialRobloxUser) {
 	const requiresOne = requirements_type === MellowLinkRequirementsType.MeetOne;
 	
 	let metRequirements = 0;
 	for (const item of requirements) {
 		let met = false;
 		const cached = requirementsCache[item.id];
-		if (cached !== undefined) {
-			if (cached)
-				met = true;
-		} else if (item.type === MellowLinkRequirementType.HasVerifiedUserLink) {
-			/*if (user) {
-				const { data, error } = await supabase.from('roblox_links').select('flags').eq('owner_id', user.id);
-				if (error)
-					throw error;
-				met = data.some(link => hasFlag(link.flags, RobloxLinkFlag.Verified));
-			}*/
-			if (robloxUser)
-				met = true;
-		} else if (item.type === MellowLinkRequirementType.HasRobloxGroupRole)
+		if (cached !== undefined)
+			met = !!cached;
+		else if (item.type === MellowLinkRequirementType.HasVerifiedUserLink)
+			met = !!robloxUser;
+		else if (item.type === MellowLinkRequirementType.HasRobloxGroupRole)
 			met = [...item.data].splice(1).every(id => robloxRoles.some(role => role.role.id.toString() == id));
 		else if (item.type === MellowLinkRequirementType.HasRobloxGroupRankInRange) {
 			const [group, min, max] = item.data;
@@ -144,8 +162,16 @@ async function meetsLink(user: User | undefined, { type, requirements, requireme
 			met = robloxRoles.some(role => role.group.id.toString() === group && role.role.rank >= min2 && role.role.rank <= max2);
 		} else if (item.type === MellowLinkRequirementType.InRobloxGroup)
 			met = robloxRoles.some(role => role.group.id.toString() === item.data[0]);
-		else if (item.type === MellowLinkRequirementType.MeetsOtherLink)
-			met = await meetsLink(user, metTypeLinks.find(i => i.id === item.data[0])!, robloxRoles, requirementsCache, metTypeLinks);
+		else if (item.type === MellowLinkRequirementType.MeetsOtherLink) {
+			const otherAction = metTypeLinks.find(i => i.id === item.data[0]);
+			if (otherAction)
+				met = await meetsLink(user, otherAction, robloxRoles, requirementsCache, metTypeLinks, robloxInventoryItems, robloxUser);
+		} else if (item.type === MellowLinkRequirementType.RobloxHasAsset)
+			met = robloxInventoryItems.some(i => i.assetDetails?.assetId === item.data[0]);
+		else if (item.type === MellowLinkRequirementType.RobloxHasBadge)
+			met = robloxInventoryItems.some(i => i.badgeDetails?.badgeId === item.data[0]);
+		else if (item.type === MellowLinkRequirementType.RobloxHasPass)
+			met = robloxInventoryItems.some(i => i.gamePassDetails?.gamePassId === item.data[0]);
 
 		if (requirementsCache[item.id] = met)
 			metRequirements++;
