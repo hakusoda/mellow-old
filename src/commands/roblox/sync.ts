@@ -37,7 +37,7 @@ export default command(({ t, token, locale, member, guild_id }) => defer(token, 
 		components: [{
 			type: 1,
 			components: [{
-				url: 'https://discord.com/api/oauth2/authorize?client_id=1068554282481229885&redirect_uri=https%3A%2F%2Fwww.voxelified.com%2Fcreate-account%2Fdiscord&response_type=code&scope=identify',
+				url: 'https://discord.com/api/oauth2/authorize?client_id=1068554282481229885&redirect_uri=https%3A%2F%2Fapi.voxelified.com%2Fv1%2Fauth%2Fcallback%2F0&response_type=code&scope=identify&state=roblox',
 				type: 2,
 				style: 5,
 				label: t('common:action.continue')
@@ -48,16 +48,15 @@ export default command(({ t, token, locale, member, guild_id }) => defer(token, 
 
 export async function verify(t: TranslateFn, executor: DiscordMember | null, server: MellowServer, token: string, serverId: string, user: User | undefined, member: DiscordMember, syncAs?: number) {
 	const userBind = user ? await supabase.from('users')
-		.select('roblox_links!roblox_links_owner_id_fkey ( target_id ), primary:roblox_links!users_primary_roblox_link_id_fkey ( target_id )')
+		.select('user_connections ( sub )')
 		.eq('id', user.id)
-		.eq('roblox_links.type', 0)
-		.gte('roblox_links.flags', 2)
+		.eq('user_connections.type', 2)
 		.limit(1)
 		.maybeSingle()
 		.then(response => {
 			if (response.error)
 				console.error(response.error);
-			return response.data?.primary as any ?? response.data?.roblox_links[0];
+			return response.data?.user_connections[0];
 		})
 	: null;
 	if (!userBind && !server.sync_unknown_users)
@@ -66,7 +65,7 @@ export async function verify(t: TranslateFn, executor: DiscordMember | null, ser
 			components: [{
 				type: 1,
 				components: [{
-					url: 'https://www.voxelified.com/roblox/authorise',
+					url: 'https://discord.com/api/oauth2/authorize?client_id=1068554282481229885&redirect_uri=https%3A%2F%2Fapi.voxelified.com%2Fv1%2Fauth%2Fcallback%2F0&response_type=code&scope=identify&state=roblox',
 					type: 2,
 					style: 5,
 					label: t('common:action.continue')
@@ -74,7 +73,7 @@ export async function verify(t: TranslateFn, executor: DiscordMember | null, ser
 			}]
 		});
 
-	const robloxId = syncAs ?? userBind?.target_id;
+	const robloxId = syncAs ?? userBind?.sub as string;
 	const [ruser] = robloxId ? await getRobloxUsers([robloxId]) : [undefined];
 	const serverLinks = await getDiscordServerBinds(serverId);
 	const discordServer = (await getDiscordServer(serverId))!;

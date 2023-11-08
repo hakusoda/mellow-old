@@ -14,7 +14,7 @@
 
 	"sync": "sync",
 	"sync.summary": "Sync your Server Profile with your Roblox Account.",
-	"sync.signup": "## Connect Roblox Account\nYou must be new to mellow, click Continue to link your Roblox Account with Voxelified.\nThis message will update with your server profile status after you link a Roblox Account.",
+	"sync.signup": "## Connect Roblox Account\nYou must be new to mellow, click Continue to link your Roblox Account with Voxelified.\n~~This message will update with your server profile status after you link a Roblox Account.~~\nThe functionality above is currently under maintenance, please execute this command again upon completion.",
 	"sync.complete.true": "## Server Profile Updated\n",
 	"sync.complete.true.0": "Your roles have been updated.",
 	"sync.complete.true.1": "Your nickname has been updated.",

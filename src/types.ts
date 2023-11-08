@@ -12,7 +12,6 @@ export interface User {
 	username: string
 	created_at: string
 	avatar_url: string
-	primary_roblox_link_id: string | null
 }
 
 export interface MellowServer {
