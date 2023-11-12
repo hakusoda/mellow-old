@@ -58,6 +58,7 @@
 
 	"error.unknown": "An unknown internal error occurred.",
 	"error.database": "An unexpected error occurred while accessing our database, please try again later.",
+	"error.maintenance": "# Service Unavailable\nSorry, mellow is currently unavailable and under maintenace, keep an eye on our [service status](https://status.voxelified.com), and try again later!",
 	"error.no_permission": "you are not cool enough 🦑",
 	"error.invalid_request": "invalid request received from discord"
 }

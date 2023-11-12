@@ -2,6 +2,7 @@
 	"deno.lint": false,
 	"deno.enable": true,
 	"deno.config": "./deno.jsonc",
+	"deno.unstable": true,
 	"deno.importMap": "./import_map.json",
 	"i18n-ally.localesPaths": ["src/localisation/locales"]
 }

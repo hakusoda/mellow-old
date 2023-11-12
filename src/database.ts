@@ -2,6 +2,8 @@ import { createClient } from 'supabase-js';
 
 import { SUPABASE_URL, SUPABASE_TOKEN } from './util/constants.ts';
 import type { User, Database, MellowBind, MellowServer } from './types.ts';
+
+export const kv = await Deno.openKv();
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_TOKEN);
 
 export function getServer(serverId: string) {

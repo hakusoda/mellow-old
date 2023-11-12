@@ -1,3 +1,7 @@
+export enum GlobalState {
+	Active,
+	Maintenance
+}
 export enum MellowServerProfileActionType {
 	GiveDiscordRoles,
 	BanDiscord,

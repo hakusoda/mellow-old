@@ -1,18 +1,18 @@
 import { validateRequest } from 'sift';
 import { verifySignature, InteractionResponseTypes } from 'discordeno';
 
-import { supabase } from '../database.ts';
 import { json, error } from './mod.ts';
 import { text, defer } from '../commands/response.ts';
+import { kv, supabase } from '../database.ts';
 import { hasPermission } from '../util/permissions.ts';
 import { channelResponse } from '../helpers/interaction.ts';
 import { DISCORD_PUBLIC_KEY } from '../util/constants.ts';
 import { editOriginalResponse } from '../discord.ts';
 import { processCustomCommand } from '../commands/custom.ts';
 import { isInteractionResponse } from '../util/mod.ts';
-import { DiscordInteractionType } from '../enums.ts';
 import type { DiscordInteraction } from '../types.ts';
 import { commands, processCommand } from '../commands/mod.ts';
+import { GlobalState, DiscordInteractionType } from '../enums.ts';
 export default async (request: Request) => {
 	const { error: validationError } = await validateRequest(request, {
 		POST: {
@@ -39,6 +39,8 @@ export default async (request: Request) => {
 		case DiscordInteractionType.Ping:
 			return json({ type: InteractionResponseTypes.Pong });
 		case DiscordInteractionType.ApplicationCommand: {
+			if ((await kv.get(['global_state'])).value === GlobalState.Maintenance)
+				return channelResponse(text('error.maintenance')(payload));
 			if (!payload.data?.name)
 				return channelResponse(text('error.invalid_request')(payload));
 
