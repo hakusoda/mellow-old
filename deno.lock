@@ -1,6 +1,48 @@
 {
   "version": "3",
+  "packages": {
+    "specifiers": {
+      "npm:@hakumi/roblox-api": "npm:@hakumi/roblox-api@0.1.0",
+      "npm:@hakumi/roblox-api@0.1.1": "npm:@hakumi/roblox-api@0.1.1",
+      "npm:@hakumi/roblox-open-cloud@0.1.1": "npm:@hakumi/roblox-open-cloud@0.1.1"
+    },
+    "npm": {
+      "@hakumi/roblox-api@0.1.0": {
+        "integrity": "sha512-giZSKTyBweksN9olBc4J2aWJ57GcNHMNh69mVeLkQbWIhDrcb2PXXu1RoqU5AR9pTsztVBINexG+3UpW1Vdacw==",
+        "dependencies": {}
+      },
+      "@hakumi/roblox-api@0.1.1": {
+        "integrity": "sha512-n3ZiTOet2EBZSxz0iltZwpPU6fAGZxGd/i2rC/c3Kywe9d6mkzLn6wB4Rbsd8q8I548FJmZu3oqVjlQ/lp9YJQ==",
+        "dependencies": {}
+      },
+      "@hakumi/roblox-open-cloud@0.1.1": {
+        "integrity": "sha512-L7wazucpXjv3tzrQt+dWR7befFJTe0jpZmp8p3oC7ur0fqjGeB8X5kXduD7Szi3zFWya6mjN+QUw29suzSeWXQ==",
+        "dependencies": {}
+      }
+    }
+  },
   "remote": {
+    "https://cdn.jsdelivr.net/gh/hakusoda/roblox-api/src/client/groups.ts": "32494019c639f2b997ebb4b6d29f2a4a73b61513a0390111a44ea43c5e12288f",
+    "https://cdn.jsdelivr.net/gh/hakusoda/roblox-api/src/client/index.ts": "2201e986775efaa7c7ebea0d84562790eb1cfb022eeaed7466d260cdfa651a69",
+    "https://cdn.jsdelivr.net/gh/hakusoda/roblox-api/src/client/users.ts": "1e7f17d76c06a3c02635c9ac1daf4fb8f62d90fb1d4d4d7101cb65bcbb44aedc",
+    "https://cdn.jsdelivr.net/gh/hakusoda/roblox-api/src/constants.ts": "9a872635e04ac7d95d7fc345e8b6ecdd049d9eaee292aa39dfef91daa1a5e90a",
+    "https://cdn.jsdelivr.net/gh/hakusoda/roblox-api/src/enums.ts": "ede598f7cd2567897d1be5b3d5e899180cee8782f3c12952cd288d0261d80a79",
+    "https://cdn.jsdelivr.net/gh/hakusoda/roblox-api/src/errors.ts": "c11b71b891e44b7ae6d7eccb73c31b03091b878a2d29d7281cff4371534eeb1d",
+    "https://cdn.jsdelivr.net/gh/hakusoda/roblox-api/src/index.ts": "03a0e57948fd7d3f132b7c8f0c5590b202781a302860c188b7dc6591fcba1811",
+    "https://cdn.jsdelivr.net/gh/hakusoda/roblox-api/src/types.ts": "3312399165ada7e1a0e3ce169fe6091272df5970d233f9a850eef0cd17683eef",
+    "https://cdn.jsdelivr.net/gh/hakusoda/roblox-api/src/util.ts": "495c083ec81521d9a4c0896a43e7fa62ee5a33663bd0b3dd3ecfd14d173799bd",
+    "https://cdn.jsdelivr.net/gh/hakusoda/roblox-open-cloud/src/auth/method/index.ts": "a0d6376656e7b179f200a03f7b128a098dce2a08cf980b6d8213973b5e37c3c0",
+    "https://cdn.jsdelivr.net/gh/hakusoda/roblox-open-cloud/src/auth/method/key.ts": "13b407548a46a0d0f8bfd6ffc78ba64401a48b83d07d1e3052fcceda24ce4fed",
+    "https://cdn.jsdelivr.net/gh/hakusoda/roblox-open-cloud/src/auth/method/oauth.ts": "50aa5aeee19b65353d51748f8acb62dbbea7e9dd127688aaf2d02ddc7cb7e995",
+    "https://cdn.jsdelivr.net/gh/hakusoda/roblox-open-cloud/src/client/groups.ts": "1bd3b3a5f0c2bfd2a9860e381aa3a18030ead84bb4ea5e84dbfd982d705f78c4",
+    "https://cdn.jsdelivr.net/gh/hakusoda/roblox-open-cloud/src/client/index.ts": "91e1a091aaef47fcf234beb186d4c72658eee2a0830e601be24ec76fb0f667a4",
+    "https://cdn.jsdelivr.net/gh/hakusoda/roblox-open-cloud/src/client/users.ts": "df28279fc98ba33253fde577b507fe79038ef437ea04f9c7d76ac2eac8460d51",
+    "https://cdn.jsdelivr.net/gh/hakusoda/roblox-open-cloud/src/constants.ts": "832d4b9f4f441831155b1812b3801a2a1921e2b3f95405578d0d282fae46c1d7",
+    "https://cdn.jsdelivr.net/gh/hakusoda/roblox-open-cloud/src/errors.ts": "db8322b44fb3c52055d406cd622465aea12ad332ff48e0790395b3c053758d6a",
+    "https://cdn.jsdelivr.net/gh/hakusoda/roblox-open-cloud/src/helpers.ts": "2191f9c4c6831e00763c0eedcc01ebd7f99b4adbe3b46043283d6aa19f155cdd",
+    "https://cdn.jsdelivr.net/gh/hakusoda/roblox-open-cloud/src/index.ts": "92b7cd820fdc81ef1acdaf8a8ae8b67c72105c727beb37384e41d802f2a152f6",
+    "https://cdn.jsdelivr.net/gh/hakusoda/roblox-open-cloud/src/index.ts#": "92b7cd820fdc81ef1acdaf8a8ae8b67c72105c727beb37384e41d802f2a152f6",
+    "https://cdn.jsdelivr.net/gh/hakusoda/roblox-open-cloud/src/types.ts": "8ac2572d7dd831c40b1de69cd1b5662a0a5112ef841cdcdec760d611faaedd7c",
     "https://cdn.skypack.dev/-/http-cache-semantics@v4.1.0-5IkAyzxageW9utYlM9Kq/dist=es2019,mode=imports/optimized/http-cache-semantics.js": "abb90d8731ed016549017a010e198e5075e5ca5308bfe429b7acaa07c3fe7200",
     "https://cdn.skypack.dev/-/http-cache-semantics@v4.1.0-5IkAyzxageW9utYlM9Kq/dist=es2019,mode=types/index.d.ts": "0bf440ab914e79e890cb15e5ffacb5e18bec678338b3eab069a5829d3d5c96e3",
     "https://cdn.skypack.dev/http-cache-semantics?dts": "dc31b1d6078daceb7667ec025de2206541c4f1c8fe480836bbaf9f8f666f9880",
@@ -1053,6 +1095,8 @@
     "https://deno.land/x/media_types@v2.11.1/mod.ts": "1be09ec3626332f9fe52a8a9ede852bb76d2207f84bec1f1b16c10555478008f",
     "https://deno.land/x/sift@0.6.0/mod.ts": "d156582201226616af9c27cf93ee06610fc907700dcc09802e3741d2b14042bd",
     "https://deno.land/x/xhr@0.3.0/mod.ts": "094aacd627fd9635cd942053bf8032b5223b909858fa9dc8ffa583752ff63b20",
+    "https://esm.sh/@hakumi/roblox-api@0.1.1?target=deno": "0c2ef2e4f69565395ed187a88909539761aea9704439bc0d6635745f0955cd7c",
+    "https://esm.sh/@hakumi/roblox-open-cloud@0.1.1?target=deno": "6c78edb043ecb18f33d0ca367cdce66f122c2b6b89a02ac497eae094e128e950",
     "https://esm.sh/@supabase/supabase-js@2.24.0": "664a361745822ccc54446e9885bed03d0b2c2614abbf9ba91c6090257a227ded",
     "https://esm.sh/@voxelified/roblox-open-cloud@0.1.0": "eb18fc2d72c43b9477a0a7bf3a7bd2e4b769021710453cfa59af0187e97ff730",
     "https://esm.sh/@voxelified/roblox-open-cloud@0.1.0?target=deno": "6371cbaf70bd9e350f4276c1d252770193f3c2b268145fa5dcc19b8668f4003c",
@@ -1128,6 +1172,8 @@
     "https://esm.sh/v124/websocket@1.0.34/deno/websocket.mjs": "dee9cdae5a7425f63426c3379430b814d098a8b03526ba83f8a7f553fed7ec08",
     "https://esm.sh/v132/@voxelified/roblox-open-cloud@0.1.0/deno/roblox-open-cloud.mjs": "0c2f61998c9720941cb580937dd1e60430f75670b3bcc5bf2f7c2eac9c1bd37d",
     "https://esm.sh/v132/@voxelified/roblox-open-cloud@0.1.0/denonext/roblox-open-cloud.mjs": "b3f7bfd52e1d6b66fa04bd371838b7240bcd0ae99bbd23a226d54a52b0b8fac4",
+    "https://esm.sh/v133/@hakumi/roblox-api@0.1.1/deno/roblox-api.mjs": "f8627d1f5e0ec9c13b0d08818113821e6894890e8f46d765704d56113f8aa904",
+    "https://esm.sh/v133/@hakumi/roblox-open-cloud@0.1.1/deno/roblox-open-cloud.mjs": "24fd2c3534339d97fad35b9bfe4c83adec42d7fa874be01a593d9454e13de839",
     "https://unpkg.com/@evan/wasm@0.0.93/target/ed25519/deno.js": "9728126890f17b71cee41afdab8a4bc362f6b9f409fe0a5c4f6ca9f3b510fd3a",
     "https://unpkg.com/@evan/wasm@0.0.93/target/zlib/deno.js": "e65131e1c1f45e64960f2699a0b868927ea5c9201c4b986a7cfc57b18be5cc09",
     "https://unpkg.com/@evan/wasm@0.0.94/target/zlib/deno.js": "e65131e1c1f45e64960f2699a0b868927ea5c9201c4b986a7cfc57b18be5cc09"

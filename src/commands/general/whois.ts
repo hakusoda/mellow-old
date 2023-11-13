@@ -1,10 +1,11 @@
+import { ROBLOX_API } from '@hakumi/roblox-api';
+
 import { command } from '../mod.ts';
 import { defer, content } from '../response.ts';
 import { editOriginalResponse } from '../../discord.ts';
 
 import { hasFlag } from '../../util/mod.ts';
 import { UserFlag } from '../../enums.ts';
-import { getRobloxUsers } from '../../roblox.ts';
 import { DiscordApplicationCommandOptionType } from '../../enums.ts';
 import { supabase, getServer, getUserByDiscordId } from '../../database.ts';
 export default command(({ t, token, guild_id }, { target }) => defer(token, async () => {
@@ -26,21 +27,12 @@ export default command(({ t, token, guild_id }, { target }) => defer(token, asyn
 			.select('sub')
 			.eq('user_id', user.id)
 			.eq('type', 2);
-		if (robloxLinks.data?.length) {
-			const users = await getRobloxUsers(robloxLinks.data.map(link => link.sub));
-			const primaryLink = robloxLinks.data[0];
+		if (robloxLinks.data) {
+			const users = await ROBLOX_API.users.getProfiles(robloxLinks.data.map(i => i.sub), ['names.username', 'names.combinedName']);
 			fields.push({
 				name: t('whois.roblox'),
 				value: users.map(user => t('whois.roblox.user', [user])).join(' • ')
 			});
-
-			if (primaryLink) {
-				const roblox = users.find(user => user.id === primaryLink.sub)!;
-				fields.push({
-					name: t('whois.roblox.sync'),
-					value: t('whois.roblox.user', [roblox])
-				});
-			}
 		}
 
 		return editOriginalResponse(token, {

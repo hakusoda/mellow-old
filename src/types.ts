@@ -1,7 +1,16 @@
-import type { MellowServerProfileActionType, DiscordChannelType, MellowServerLogType, DiscordInteractionType, CustomCommandActionType, MellowServerAuditLogType, MellowLinkRequirementType, MellowLinkRequirementsType, CustomCommandActionParentType, DiscordApplicationCommandOptionType } from './enums.ts';
+import type { MellowProfileSyncActionType, DiscordChannelType, MellowServerLogType, DiscordInteractionType, CustomCommandActionType, MellowServerAuditLogType, MellowProfileSyncActionRequirementType, MellowProfileSyncActionRequirementsType, CustomCommandActionParentType, DiscordApplicationCommandOptionType } from './enums.ts';
 export interface RobloxLink {
 	id: string
 	owner: string
+}
+
+// deno made me do this 😓
+export interface RobloxProfile {
+	names: {
+		username: string
+		combinedName: string
+	}
+	userId: number
 }
 
 export interface User {
@@ -24,22 +33,44 @@ export interface MellowServer {
 		request_headers: Record<string, string>
 	}[]
 	default_nickname: string
-	sync_unknown_users: boolean
 	allow_forced_syncing: boolean
 }
-export interface MellowBind {
+
+export type MellowProfileSyncAction = {
 	id: string
 	name: string
-	type: MellowServerProfileActionType
-
-	data: string[]
-
+	metadata: {}
+	created_at: string
 	requirements: {
 		id: string
 		data: string[]
-		type: MellowLinkRequirementType
+		type: MellowProfileSyncActionRequirementType
 	}[]
-	requirements_type: MellowLinkRequirementsType
+	requirements_type: MellowProfileSyncActionRequirementsType
+} & ({
+	type: MellowProfileSyncActionType.GiveRoles
+	metadata: {
+		items: string[]
+		can_remove: boolean
+	}
+} | {
+	type: MellowProfileSyncActionType.BanFromServer
+	metadata: MellowRemoveMemberMetadata & {
+		delete_messages_seconds: number
+	}
+} | {
+	type: MellowProfileSyncActionType.KickFromServer
+	metadata: MellowRemoveMemberMetadata
+} | {
+	type: MellowProfileSyncActionType.CancelSync
+	metadata: {
+		user_facing_reason: string | null
+	}
+})
+
+export interface MellowRemoveMemberMetadata {
+	audit_log_reason: string | null
+	user_facing_reason: string | null
 }
 
 export interface CustomCommand {
@@ -82,7 +113,7 @@ type ServerProfileSyncLog = [MellowServerLogType.ServerProfileSync, {
 	banned: boolean
 	kicked: boolean
 	member: DiscordMember
-	roblox?: PartialRobloxUser
+	roblox?: RobloxProfile
 	nickname: [string | null, string | null]
 	forced_by: DiscordMember | null
 	addedRoles: DiscordRole[]
@@ -90,43 +121,6 @@ type ServerProfileSyncLog = [MellowServerLogType.ServerProfileSync, {
 }]
 
 export type Log = AuditLogLog | ServerProfileSyncLog
-
-export interface Database {
-	public: {
-		Views: {}
-		Tables: {
-			users: {
-				Row: User & Record<string, unknown>
-				Insert: {}
-				Update: {}
-			}
-			mellow_binds: {
-				Row: MellowBind & Record<string, unknown>
-				Insert: {}
-				Update: {}
-			}
-			mellow_signups: {
-				Row: {
-					id: number
-					locale: string
-					user_id: string
-					server_id: string
-					interaction_token: string
-				}
-				Insert: {}
-				Update: {}
-			}
-		}
-		Functions: {
-			get_user_by_discord_user_id: {
-				Args: {
-					discord_user_id: string
-				}
-				Returns: User
-			}
-		}
-	}
-}
 
 // https://discord.com/developers/docs/reference#locales
 export type DiscordLocale = 'ja' | 'en-US'
@@ -482,17 +476,6 @@ export type TranslateFn = (keys: string | string[], ...args: any[]) => string
 
 export interface CommandExecutePayload extends DiscordInteraction {
 	t: TranslateFn
-}
-
-export interface PartialRobloxUser {
-	id: number
-	name: string
-	displayName: string
-	hasVerifiedBadge: boolean
-}
-
-export interface RobloxUsersResponse {
-	data: PartialRobloxUser[]
 }
 
 export interface RobloxUserRolesResponse {

@@ -1,14 +1,14 @@
 import { createClient } from 'supabase-js';
 
 import { SUPABASE_URL, SUPABASE_TOKEN } from './util/constants.ts';
-import type { User, Database, MellowBind, MellowServer } from './types.ts';
+import type { User, MellowServer, MellowProfileSyncAction } from './types.ts';
 
 export const kv = await Deno.openKv();
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_TOKEN);
+export const supabase = createClient(SUPABASE_URL, SUPABASE_TOKEN);
 
 export function getServer(serverId: string) {
 	return supabase.from('mellow_servers')
-		.select<string, MellowServer>('id, default_nickname, sync_unknown_users, allow_forced_syncing, webhooks:mellow_server_webhooks ( events, enabled, target_url, request_method, request_headers )')
+		.select<string, MellowServer>('id, default_nickname, allow_forced_syncing, webhooks:mellow_server_webhooks ( events, enabled, target_url, request_method, request_headers )')
 		.eq('id', serverId)
 		.limit(1)
 		.maybeSingle()
@@ -19,13 +19,15 @@ export function getServer(serverId: string) {
 		});
 }
 
-export async function getUser(userId: string): Promise<User | null> {
+export async function getUser(userId: string) {
 	const { data, error } = await supabase.from('users')
-		.select('*')
-		.eq('id', userId);
+		.select<string, User>('*')
+		.eq('id', userId)
+		.limit(1)
+		.maybeSingle();
 	if (error)
 		console.error(error);
-	return error ? null : data[0];
+	return data;
 }
 
 export async function getUserByDiscordId(userId: string) {
@@ -41,9 +43,9 @@ export async function getUsersByDiscordId(userIds: string[]) {
 	return error ? [] : data.map(user => ({ ...user.user as any as typeof data[number]['user'][number], sub: user.sub }));
 }
 
-export async function getDiscordServerBinds(serverId: string): Promise<MellowBind[]> {
+export async function getServerProfileSyncingActions(serverId: string): Promise<MellowProfileSyncAction[]> {
 	const { data, error } = await supabase.from('mellow_binds')
-		.select<string, any>('id, name, type, data, requirements:mellow_bind_requirements ( id, type, data ), requirements_type')
+		.select<string, any>('id, name, type, metadata, created_at, requirements_type, requirements:mellow_bind_requirements ( id, type, data )')
 		.eq('server_id', serverId);
 	if (error)
 		console.error(error);

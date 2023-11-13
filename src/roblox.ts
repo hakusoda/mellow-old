@@ -1,35 +1,23 @@
-import { getFixedT } from 'i18next';
+import { ROBLOX_API } from '@hakumi/roblox-api';
 import type { InventoryItem } from '@voxelified/roblox-open-cloud';
 import { OpenCloudClient, OpenCloudApiKey } from '@voxelified/roblox-open-cloud';
 
 import { hasFlag } from './util/mod.ts';
-import { content } from './commands/response.ts';
+import { notifyMemberOfRemoval } from './syncing.ts';
 import { ROBLOX_OPEN_CLOUD_API_KEY } from './util/constants.ts';
-import { banMember, kickMember, modifyMember, upsertUserChannel, getMemberPosition, createChannelMessage } from './discord.ts';
-import { MellowLinkRequirementType, MellowLinkRequirementsType, MellowServerProfileActionType, MellowServerAuditLogActionType } from './enums.ts';
-import type { User, MellowBind, DiscordRole, MellowServer, DiscordGuild, DiscordMember, PartialRobloxUser, RobloxUsersResponse, RobloxUserRolesResponse, RobloxServerProfileSyncResult } from './types.ts';
+import { banMember, kickMember, modifyMember, getMemberPosition } from './discord.ts';
+import { MellowProfileSyncActionRequirementType, MellowProfileSyncActionRequirementsType, MellowProfileSyncActionType, MellowServerAuditLogActionType } from './enums.ts';
+import type { User, DiscordRole, MellowServer, DiscordGuild, DiscordMember, RobloxProfile, RobloxUserRolesResponse, MellowProfileSyncAction, RobloxServerProfileSyncResult } from './types.ts';
 
 const openCloud = new OpenCloudClient(new OpenCloudApiKey(ROBLOX_OPEN_CLOUD_API_KEY));
-export function getRobloxUsers(userIds: (string | number)[]) {
-	return fetch(`https://users.roblox.com/v1/users`, {
-		body: JSON.stringify({
-			userIds,
-			excludeBannedUsers: false
-		}),
-		method: 'POST'
-	})
-		.then(response => response.json())
-		.then(data => (data as RobloxUsersResponse).data);
-}
-
 export function getRobloxUserRoles(userId: string | number) {
 	return fetch(`https://groups.roblox.com/v2/users/${userId}/groups/roles`)
 		.then(response => response.json())
 		.then(data => (data as RobloxUserRolesResponse).data);
 }
 
-// TODO: rewrite! please! pretty please! .·´¯`(>▂<)´¯`·. 
-export async function syncMember(executor: DiscordMember | null, server: MellowServer, serverLinks: MellowBind[], discordServer: DiscordGuild, user: User | undefined, member: DiscordMember, robloxUser: PartialRobloxUser | undefined, mellowPosition: number): Promise<RobloxServerProfileSyncResult> {
+// TODO: rewrite in syncing.ts with multi-service support
+export async function syncMember(executor: DiscordMember | null, server: MellowServer, syncActions: MellowProfileSyncAction[], discordServer: DiscordGuild, user: User | undefined, member: DiscordMember, robloxUser: RobloxProfile | undefined, mellowPosition: number): Promise<RobloxServerProfileSyncResult> {
 	let roles = [...member.roles];
 	let nickname = member.nick;
 	let rolesChanged = false;
@@ -39,14 +27,16 @@ export async function syncMember(executor: DiscordMember | null, server: MellowS
 	const removedRoles: DiscordRole[] = [];
 
 	const { default_nickname } = server;
-	if (default_nickname && (robloxUser || !default_nickname.includes('{name}')))
-		nickname = default_nickname.replace('{name}', robloxUser?.displayName ?? '');
+	if (default_nickname && robloxUser)
+		nickname = default_nickname
+			.replace('{roblox_username}', robloxUser.names.username)
+			.replace('{roblox_display_name}', robloxUser.names.combinedName);
 
-	const robloxRoles = robloxUser && serverLinks.some(bind => bind.requirements.some(r => r.type === MellowLinkRequirementType.HasRobloxGroupRole || r.type === MellowLinkRequirementType.HasRobloxGroupRankInRange)) ? await getRobloxUserRoles(robloxUser.id) : [];
+	const robloxRoles = robloxUser && syncActions.some(bind => bind.requirements.some(r => r.type === MellowProfileSyncActionRequirementType.RobloxHaveGroupRole || r.type === MellowProfileSyncActionRequirementType.RobloxHaveGroupRankInRange)) ? await getRobloxUserRoles(robloxUser.userId) : [];
 	
-	const robloxInventoryAssets = serverLinks.flatMap(action => action.requirements.filter(r => r.type === MellowLinkRequirementType.RobloxHasAsset)).map(item => item.data[0]);
-	const robloxInventoryBadges = serverLinks.flatMap(action => action.requirements.filter(r => r.type === MellowLinkRequirementType.RobloxHasBadge)).map(item => item.data[0]);
-	const robloxInventoryPasses = serverLinks.flatMap(action => action.requirements.filter(r => r.type === MellowLinkRequirementType.RobloxHasPass)).map(item => item.data[0]);
+	const robloxInventoryAssets = syncActions.flatMap(action => action.requirements.filter(r => r.type === MellowProfileSyncActionRequirementType.RobloxHaveAsset)).map(item => item.data[0]);
+	const robloxInventoryBadges = syncActions.flatMap(action => action.requirements.filter(r => r.type === MellowProfileSyncActionRequirementType.RobloxHaveBadge)).map(item => item.data[0]);
+	const robloxInventoryPasses = syncActions.flatMap(action => action.requirements.filter(r => r.type === MellowProfileSyncActionRequirementType.RobloxHavePass)).map(item => item.data[0]);
 	
 	let inventoryFilter: [string, string][] = [];
 	if (robloxInventoryAssets.length)
@@ -57,47 +47,48 @@ export async function syncMember(executor: DiscordMember | null, server: MellowS
 		inventoryFilter.push(['gamePassIds', robloxInventoryPasses.join(',')]);
 	const robloxInventoryItems = robloxUser && inventoryFilter.length ?
 		await openCloud.users.getInventoryItems(
-			robloxUser.id,
+			robloxUser.userId,
 			100,
 			inventoryFilter.map(i => `${i[0]}=${i[1]}`).join(';')
 		)
-	: [];
+	: { inventoryItems: [] };
 
-	const metTypeReqs = serverLinks.flatMap(link => link.requirements.filter(r => r.type === MellowLinkRequirementType.MeetsOtherLink));
-	const metTypeLinks = serverLinks.filter(link => metTypeReqs.find(item => item.data[0] === link.id));
+	const metTypeReqs = syncActions.flatMap(link => link.requirements.filter(r => r.type === MellowProfileSyncActionRequirementType.MeetOtherAction));
+	const metTypeLinks = syncActions.filter(link => metTypeReqs.find(item => item.data[0] === link.id));
 	const requirementsCache: Record<string, boolean> = {};
 	
 	let removed = false, kicked = false, banned = false;
-	for (const link of serverLinks) {
-		const value = await meetsLink(user, link, robloxRoles, requirementsCache, metTypeLinks, robloxInventoryItems.inventoryItems, robloxUser);
-		if (link.type === MellowServerProfileActionType.GiveDiscordRoles) {
+	for (const link of syncActions) {
+		const value = await meetsActionRequirements(user, link, robloxRoles, requirementsCache, metTypeLinks, robloxInventoryItems.inventoryItems, robloxUser);
+		const { type, metadata } = link;
+		if (type === MellowProfileSyncActionType.GiveRoles) {
 			if (value) {
-				if (!link.data.every(id => member!.roles.includes(id))) {
-					const filtered = link.data.filter(id => !member!.roles.includes(id));
+				if (!metadata.items.every(id => member!.roles.includes(id))) {
+					const filtered = metadata.items.filter(id => !member!.roles.includes(id));
 					roles.push(...filtered);
 					addedRoles.push(...filtered.map(r => discordServer.roles.find(j => j.id === r)!));
 					rolesChanged = true;
 				}
 			} else {
-				const filtered = roles.filter(id => !link.data.includes(id));
-				if (!roles.every(id => filtered.includes(id))) {
-					const filtered2 = link.data.filter(id => roles.includes(id));
+				const filtered = roles.filter(id => !metadata.items.includes(id));
+				if (metadata.can_remove && !roles.every(id => filtered.includes(id))) {
+					const filtered2 = metadata.items.filter(id => roles.includes(id));
 					roles = filtered;
 					removedRoles.push(...filtered2.map(r => discordServer.roles.find(j => j.id === r)!));
 					rolesChanged = true;
 				}
 			}
-		} else if (link.type === MellowServerProfileActionType.BanDiscord) {
+		} else if (type === MellowProfileSyncActionType.BanFromServer) {
 			if (value && !banned) {
 				removed = banned = true;
-				await notifyMemberOfRemoval(member.user.id, discordServer, 1, link.data[1]);
-				await banMember(server.id, member.user.id, `Banned due to meeting the requirements of "${link.name}"${link.data[0] ? `.\n${link.data[0]}` : ''}`);
+				await notifyMemberOfRemoval(member.user.id, discordServer, 1, metadata.user_facing_reason);
+				await banMember(server.id, member.user.id, `Banned due to meeting the requirements of "${link.name}"${metadata.audit_log_reason ? `.\n${metadata.audit_log_reason}` : ''}`);
 			}
-		} else if (link.type === MellowServerProfileActionType.KickDiscord) {
+		} else if (type === MellowProfileSyncActionType.KickFromServer) {
 			if (value && !removed) {
 				removed = kicked = true;
-				await notifyMemberOfRemoval(member.user.id, discordServer, 0, link.data[1]);
-				await kickMember(server.id, member.user.id, `Kicked due to meeting the requirements of "${link.name}"${link.data[0] ? `.\n${link.data[0]}` : ''}`);
+				await notifyMemberOfRemoval(member.user.id, discordServer, 0, metadata.user_facing_reason);
+				await kickMember(server.id, member.user.id, `Kicked due to meeting the requirements of "${link.name}"${metadata.audit_log_reason ? `.\n${metadata.audit_log_reason}` : ''}`);
 			}
 		}
 	}
@@ -117,7 +108,7 @@ export async function syncMember(executor: DiscordMember | null, server: MellowS
 					data: {
 						guild_id: discordServer.id,
 						member_id: member.user.id,
-						roblox_id: robloxUser?.id ?? null,
+						roblox_id: robloxUser?.userId ?? null,
 						forced_by: executor ? {
 							id: executor.user.id
 						} : null,
@@ -142,9 +133,8 @@ export async function syncMember(executor: DiscordMember | null, server: MellowS
 
 const mapRoleForWebhook = (role: DiscordRole) => ({ id: role.id, name: role.id });
 
-// TODO: rewrite! please! pretty please! .·´¯`(>▂<)´¯`·. 
-async function meetsLink(user: User | undefined, { type, requirements, requirements_type }: MellowBind, robloxRoles: RobloxUserRolesResponse['data'], requirementsCache: Record<string, boolean>, metTypeLinks: MellowBind[], robloxInventoryItems: InventoryItem[], robloxUser?: PartialRobloxUser) {
-	const requiresOne = requirements_type === MellowLinkRequirementsType.MeetOne;
+async function meetsActionRequirements(user: User | undefined, { requirements, requirements_type }: MellowProfileSyncAction, robloxRoles: RobloxUserRolesResponse['data'], requirementsCache: Record<string, boolean>, metTypeLinks: MellowProfileSyncAction[], robloxInventoryItems: InventoryItem[], robloxUser?: RobloxProfile) {
+	const requiresOne = requirements_type === MellowProfileSyncActionRequirementsType.MeetOne;
 	
 	let metRequirements = 0;
 	for (const item of requirements) {
@@ -152,25 +142,25 @@ async function meetsLink(user: User | undefined, { type, requirements, requireme
 		const cached = requirementsCache[item.id];
 		if (cached !== undefined)
 			met = !!cached;
-		else if (item.type === MellowLinkRequirementType.HasVerifiedUserLink)
+		else if (item.type === MellowProfileSyncActionRequirementType.RobloxHaveConnection)
 			met = !!robloxUser;
-		else if (item.type === MellowLinkRequirementType.HasRobloxGroupRole)
+		else if (item.type === MellowProfileSyncActionRequirementType.RobloxHaveGroupRole)
 			met = [...item.data].splice(1).every(id => robloxRoles.some(role => role.role.id.toString() == id));
-		else if (item.type === MellowLinkRequirementType.HasRobloxGroupRankInRange) {
+		else if (item.type === MellowProfileSyncActionRequirementType.RobloxHaveGroupRankInRange) {
 			const [group, min, max] = item.data;
 			const min2 = parseInt(min), max2 = parseInt(max);
 			met = robloxRoles.some(role => role.group.id.toString() === group && role.role.rank >= min2 && role.role.rank <= max2);
-		} else if (item.type === MellowLinkRequirementType.InRobloxGroup)
+		} else if (item.type === MellowProfileSyncActionRequirementType.RobloxInGroup)
 			met = robloxRoles.some(role => role.group.id.toString() === item.data[0]);
-		else if (item.type === MellowLinkRequirementType.MeetsOtherLink) {
+		else if (item.type === MellowProfileSyncActionRequirementType.MeetOtherAction) {
 			const otherAction = metTypeLinks.find(i => i.id === item.data[0]);
 			if (otherAction)
-				met = await meetsLink(user, otherAction, robloxRoles, requirementsCache, metTypeLinks, robloxInventoryItems, robloxUser);
-		} else if (item.type === MellowLinkRequirementType.RobloxHasAsset)
+				met = await meetsActionRequirements(user, otherAction, robloxRoles, requirementsCache, metTypeLinks, robloxInventoryItems, robloxUser);
+		} else if (item.type === MellowProfileSyncActionRequirementType.RobloxHaveAsset)
 			met = robloxInventoryItems.some(i => i.assetDetails?.assetId === item.data[0]);
-		else if (item.type === MellowLinkRequirementType.RobloxHasBadge)
+		else if (item.type === MellowProfileSyncActionRequirementType.RobloxHaveBadge)
 			met = robloxInventoryItems.some(i => i.badgeDetails?.badgeId === item.data[0]);
-		else if (item.type === MellowLinkRequirementType.RobloxHasPass)
+		else if (item.type === MellowProfileSyncActionRequirementType.RobloxHavePass)
 			met = robloxInventoryItems.some(i => i.gamePassDetails?.gamePassId === item.data[0]);
 
 		if (requirementsCache[item.id] = met)
@@ -180,12 +170,4 @@ async function meetsLink(user: User | undefined, { type, requirements, requireme
 	}
 
 	return metRequirements === requirements.length || (requiresOne && !!metRequirements);
-}
-
-async function notifyMemberOfRemoval(userId: string, server: DiscordGuild, type: 0 | 1, reason?: string) {
-	const t = await getFixedT(server.preferred_locale, 'common');
-	const channel = await upsertUserChannel(userId);
-	if (channel)
-		await createChannelMessage(channel.id, content(`${t('direct_message.removal', [server.name])}${t(`direct_message.type.${type}`)}${reason ? t('direct_message.reason', [reason]) : ''}${t('direct_message.footer')}`))
-			.catch(console.error);
 }

@@ -1,26 +1,24 @@
+import { ROBLOX_API } from '@hakumi/roblox-api';
+
 import { command } from '../mod.ts';
 import { defer, content } from '../response.ts';
 import { editOriginalResponse } from '../../discord.ts';
 
 import { sendLogs } from '../../logging.ts';
+import { syncMember } from '../../roblox.ts';
 import { supabase, getServer } from '../../database.ts';
-import { syncMember, getRobloxUsers } from '../../roblox.ts';
 import { getDiscordServer, getMemberPosition } from '../../discord.ts';
 import { DiscordMessageFlag, MellowServerLogType } from '../../enums.ts';
-import { getUserByDiscordId, getDiscordServerBinds } from '../../database.ts';
-import type { User, TranslateFn, MellowServer, DiscordMember } from '../../types.ts';
+import { getUserByDiscordId, getServerProfileSyncingActions } from '../../database.ts';
+import type { User, TranslateFn, MellowServer, DiscordMember, RobloxProfile } from '../../types.ts';
 export default command(({ t, token, locale, member, guild_id }) => defer(token, async () => {
 	const server = await getServer(guild_id);
 	if (!server)
 		return editOriginalResponse(token, content(t('sync.no_server')));
 
 	const user = await getUserByDiscordId(member!.user.id as any);
-	console.log(user);
 	if (user)
 		return verify(t, null, server, token, guild_id, user, member!);
-		/*return editOriginalResponse(token, {
-			content: 'うぁぁ…。よい…！！'
-		});*/
 
 	supabase.from('mellow_signups').upsert({
 		locale,
@@ -59,7 +57,7 @@ export async function verify(t: TranslateFn, executor: DiscordMember | null, ser
 			return response.data?.user_connections[0];
 		})
 	: null;
-	if (!userBind && !server.sync_unknown_users)
+	if (!userBind)
 		return editOriginalResponse(token, {
 			content: t('sync.signup'),
 			components: [{
@@ -74,8 +72,8 @@ export async function verify(t: TranslateFn, executor: DiscordMember | null, ser
 		});
 
 	const robloxId = syncAs ?? userBind?.sub as string;
-	const [ruser] = robloxId ? await getRobloxUsers([robloxId]) : [undefined];
-	const serverLinks = await getDiscordServerBinds(serverId);
+	const [ruser]: RobloxProfile[] = robloxId ? await ROBLOX_API.users.getProfiles([robloxId], ['names.username', 'names.combinedName']) : [undefined];
+	const serverLinks = await getServerProfileSyncingActions(serverId);
 	const discordServer = (await getDiscordServer(serverId))!;
 	const position = getMemberPosition(discordServer, member);
 	const {
@@ -118,7 +116,7 @@ export async function verify(t: TranslateFn, executor: DiscordMember | null, ser
 				}] : []
 			]
 		}] : [],
-		content: removed ? t('sync.complete.removed') + t(`sync.complete.removed.${banned ? 0 : 1}`) : t(`sync.complete.${profileChanged}`) + (rolesChanged ? nicknameChanged ? t('sync.complete.true.2') : t('sync.complete.true.0') : nicknameChanged ? t('sync.complete.true.1') : '') + t('sync.profile', [ruser]),
+		content: removed ? t('sync.complete.removed') + t(`sync.complete.removed.${banned ? 0 : 1}`) : t(`sync.complete.${profileChanged}`) + (rolesChanged ? nicknameChanged ? t('sync.complete.true.2') : t('sync.complete.true.0') : nicknameChanged ? t('sync.complete.true.1') : ''),
 		components: []
 	});
 }

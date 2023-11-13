@@ -14,7 +14,7 @@
 
 	"sync": "sync",
 	"sync.summary": "Sync your Server Profile with your Roblox Account.",
-	"sync.signup": "## Connect Roblox Account\nYou must be new to mellow, click Continue to link your Roblox Account with Voxelified.\n~~This message will update with your server profile status after you link a Roblox Account.~~\nThe functionality above is currently under maintenance, please execute this command again upon completion.",
+	"sync.signup": "## Connect Roblox Account\nYou must be new to mellow, click Continue to connect your Roblox Account.\n~~This message will update with your server profile status after you link a Roblox Account.~~\nThe functionality above is currently under maintenance, please execute this command again upon completion.",
 	"sync.complete.true": "## Server Profile Updated\n",
 	"sync.complete.true.0": "Your roles have been updated.",
 	"sync.complete.true.1": "Your nickname has been updated.",
@@ -26,13 +26,11 @@
 	"sync.complete.removed2": "has been removed from this server",
 	"sync.complete.removed.0": "This member has been banned for meeting the requirements of a ban action.",
 	"sync.complete.removed.1": "This member has been kicked for meeting the requirements of a kick action.",
-	"sync.no_server": "## Cannot Sync Profile\nThis Discord Server is not connected to mellow, Roblox Syncing is not available.",
-	"sync.profile": "\nYou are currently syncing in this server as [{{0.displayName}}](https://www.roblox.com/users/{{0.id}}/profile).",
-	"sync.reconnect": "## Cannot Sync Profile\nYour account is currently connected to Discord via a legacy feature, please reconnect it [here](https://www.voxelified.com/settings/account/connections).",
+	"sync.no_server": "## Cannot Sync Profile\nThis server has not been set-up with mellow yet, ",
 
 	"forcesync": "forcesync",
 	"forcesync.summary": "Forcefully sync someone's server profile.",
-	"forcesync.disabled": "## Cannot Sync Profile(s)\nSorry, forceful syncing has been disabled in this server, enable it [here](https://www.voxelified.com/mellow/server/{{0.id}}/settings/archive/audit-log).",
+	"forcesync.disabled": "## Cannot Sync Profile(s)\nSorry, forceful syncing has been disabled in this server, if you manage this server, enable it [here](https://www.voxelified.com/mellow/server/{{0.id}}/settings/syncing/settings).",
 
 	"forcesyncall": "forcesyncall",
 	"forcesyncall.summary": "Forcefully sync the profiles of everyone in this server.",
@@ -41,17 +39,16 @@
 
 	"setup": "setup",
 	"setup.summary": "Connect this Discord Server to mellow.",
-	"setup.signup": "## Account required\nBefore you can continue, you need to [sign-up](https://www.voxelified.com/sign-up) for a Voxelified Account.\nAfter that, if you did not sign-up with Discord, please connect your account [here](https://www.voxelified.com/settings/account/connections).\nExecute this command again after completing these instructions.",
+	"setup.signup": "## Account required\nBefore you can continue, you need to [sign-up](https://www.voxelified.com/sign-up) for a HAKUMI Account.\nAfter that, if you did not sign-up with Discord, please connect your account [here](https://www.voxelified.com/settings/account/connections).\nExecute this command again after completing these instructions.",
 	"setup.exists": "## Server already connected\nThis server is already connected to mellow, view it [here](https://www.voxelified.com/mellow/server/{{0}}/settings).",
 	"setup.done": "## Server connected\nThis server is now connected to mellow!\nConfigure it online [here](https://www.voxelified.com/mellow/server/{{0}}/settings).",
 
 	"whois": "profile",
-	"whois.summary": "Request someone's Voxelified Profile.",
+	"whois.summary": "Request someone's HAKUMI Profile.",
 	"whois.empty_bio": "This user hasn't written a bio yet...",
 	"whois.roles": "Roles",
 	"whois.roblox": "Known on Roblox as",
-	"whois.roblox.sync": "Syncing in this server as",
-	"whois.roblox.user": "[{{0.displayName}} (@{{0.name}})](https://www.roblox.com/users/{{0.id}})",
+	"whois.roblox.user": "[{{0.names.combinedName}} (@{{0.names.username}})](https://www.roblox.com/users/{{0.id}})",
 	"whois.joined": "Joined",
 
 	"placeholder.summary": "this description does not exist 🦑",

@@ -1,14 +1,16 @@
+import { ROBLOX_API } from '@hakumi/roblox-api';
+
 import { command } from '../mod.ts';
 import { defer, content } from '../response.ts';
 import { editOriginalResponse } from '../../discord.ts';
 
-import type { Log } from '../../types.ts';
 import { sendLogs } from '../../logging.ts';
+import { syncMember } from '../../roblox.ts';
 import { DISCORD_APP_ID } from '../../util/constants.ts';
 import { supabase, getServer } from '../../database.ts';
-import { syncMember, getRobloxUsers } from '../../roblox.ts';
+import type { Log, RobloxProfile } from '../../types.ts';
 import { DiscordMessageFlag, MellowServerLogType } from '../../enums.ts';
-import { getUsersByDiscordId, getDiscordServerBinds } from '../../database.ts';
+import { getUsersByDiscordId, getServerProfileSyncingActions } from '../../database.ts';
 import { getDiscordServer, getServerMembers, getMemberPosition } from '../../discord.ts';
 export default command(({ t, token, member, guild_id }) => defer(token, async () => {
 	const server = await getServer(guild_id);
@@ -34,10 +36,10 @@ export default command(({ t, token, member, guild_id }) => defer(token, async ()
 			return response.data?.map(item => item.user_connections[0]).filter(i => i) ?? [];
 		});
 
-	const robloxUsers = await getRobloxUsers(links.map(link => link.sub as string));
+	const robloxUsers: RobloxProfile[] = await ROBLOX_API.users.getProfiles(links.map(link => link.sub as string), ['names.username', 'names.combinedName']);
 
 	let synced = 0;
-	const serverLinks = await getDiscordServerBinds(guild_id);
+	const serverLinks = await getServerProfileSyncingActions(guild_id);
 	const discordServer = await getDiscordServer(guild_id);
 	if (!discordServer)
 		throw new Error();
@@ -46,35 +48,33 @@ export default command(({ t, token, member, guild_id }) => defer(token, async ()
 	const mellowPosition = getMemberPosition(discordServer, mellow);
 	for (const target of members) {
 		const user = users.find(user => user.sub === target.user.id);
-		if (user || server.sync_unknown_users) {
-			const userLinks = user ? links.filter(link => link.user_id === user.id) : [];
-			const robloxUser = robloxUsers.find(user => userLinks.some(link => link.sub === user.id.toString()));
-			const {
+		const userLinks = user ? links.filter(link => link.user_id === user.id) : [];
+		const robloxUser = robloxUsers.find(user => userLinks.some(link => link.sub === user.userId.toString()));
+		const {
+			banned,
+			kicked,
+			addedRoles,
+			removedRoles,
+			rolesChanged,
+	
+			newNickname,
+			nicknameChanged
+		} = await syncMember(member, server, serverLinks, discordServer, user, target, robloxUser, mellowPosition);
+		const profileChanged = rolesChanged || nicknameChanged;
+		if (profileChanged || banned || kicked)
+			syncLogs.push([MellowServerLogType.ServerProfileSync, {
 				banned,
 				kicked,
+				member: target,
+				roblox: robloxUser,
+				nickname: [target.nick, newNickname],
+				forced_by: member,
 				addedRoles,
-				removedRoles,
-				rolesChanged,
+				removedRoles
+			}]);
 		
-				newNickname,
-				nicknameChanged
-			} = await syncMember(member, server, serverLinks, discordServer, user, target, robloxUser, mellowPosition);
-			const profileChanged = rolesChanged || nicknameChanged;
-			if (profileChanged || banned || kicked)
-				syncLogs.push([MellowServerLogType.ServerProfileSync, {
-					banned,
-					kicked,
-					member: target,
-					roblox: robloxUser,
-					nickname: [target.nick, newNickname],
-					forced_by: member,
-					addedRoles,
-					removedRoles
-				}]);
-			
-			synced++;
-			await new Promise(resolve => setTimeout(resolve, 500));
-		}
+		synced++;
+		await new Promise(resolve => setTimeout(resolve, 500));
 	}
 
 	if (syncLogs.length)

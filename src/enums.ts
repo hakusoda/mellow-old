@@ -2,26 +2,27 @@ export enum GlobalState {
 	Active,
 	Maintenance
 }
-export enum MellowServerProfileActionType {
-	GiveDiscordRoles,
-	BanDiscord,
-	KickDiscord
+export enum MellowProfileSyncActionType {
+	GiveRoles,
+	BanFromServer,
+	KickFromServer,
+	CancelSync
 }
-export enum MellowLinkRequirementType {
-	HasVerifiedUserLink,
-	HasRobloxGroupRole,
-	HasRobloxGroupRankInRange,
-	InRobloxGroup,
-	IsFriendsWith,
-	MeetsOtherLink,
-	VoxelifiedInTeam,
+export enum MellowProfileSyncActionRequirementType {
+	RobloxHaveConnection,
+	RobloxHaveGroupRole,
+	RobloxHaveGroupRankInRange,
+	RobloxInGroup,
+	RobloxBeFriendsWith,
+	MeetOtherAction,
+	HAKUMIInTeam,
 	SteamInGroup,
-	RobloxHasAsset,
-	RobloxHasBadge,
-	RobloxHasPass,
+	RobloxHaveAsset,
+	RobloxHaveBadge,
+	RobloxHavePass,
 	GitHubInOrganisation
 }
-export enum MellowLinkRequirementsType {
+export enum MellowProfileSyncActionRequirementsType {
 	MeetAll,
 	MeetOne
 }

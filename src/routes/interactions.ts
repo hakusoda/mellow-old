@@ -57,7 +57,7 @@ export default async (request: Request) => {
 				}));
 			}
 			
-			const command = commands[payload.data.name];
+			const command = commands[payload.data.name!];
 			if (!command)
 				return channelResponse(text('error.invalid_request')(payload));
 
