@@ -100,7 +100,7 @@ export function upsertUserChannel(userId: string) {
 }
 
 export function getDiscordServer(serverId: string) {
-	return makeRequest<DiscordGuild>(`/guilds/${serverId}`)
+	return makeRequest<DiscordGuild>(`/guilds/${serverId}?with_counts=true`)
 		.then(response => response.success ? response.data : null);
 }
 

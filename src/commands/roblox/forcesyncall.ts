@@ -18,6 +18,13 @@ export default command(({ t, token, member, guild_id }) => defer(token, async ()
 	if (!server.allow_forced_syncing)
 		return editOriginalResponse(token, content(t('forcesync.disabled', [server])));
 
+	const discordServer = await getDiscordServer(guild_id);
+	if (!discordServer)
+		throw new Error();
+
+	if (discordServer.approximate_member_count! > 99)
+		return editOriginalResponse(token, content(t('forcesyncall.server_too_big')));
+
 	const members = await getServerMembers(guild_id);
 	const mellow = members.find(member => member.user.id === DISCORD_APP_ID);
 	if (!mellow)
@@ -38,9 +45,6 @@ export default command(({ t, token, member, guild_id }) => defer(token, async ()
 
 	let synced = 0;
 	const serverLinks = await getServerProfileSyncingActions(guild_id);
-	const discordServer = await getDiscordServer(guild_id);
-	if (!discordServer)
-		throw new Error();
 
 	const syncLogs: Log[] = [];
 	const webhookEventItems: WebhookSyncedEventItem[] = [];
@@ -78,10 +82,11 @@ export default command(({ t, token, member, guild_id }) => defer(token, async ()
 					type: item.type
 				}))
 			});
+
+			await new Promise(resolve => setTimeout(resolve, 500));
 		}
 		
 		synced++;
-		await new Promise(resolve => setTimeout(resolve, 500));
 	}
 
 	if (syncLogs.length)
