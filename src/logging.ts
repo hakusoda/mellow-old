@@ -83,7 +83,7 @@ export async function sendLogs(logs: Log[], serverId: string) {
 						title: `${authorName} ${t(`server_audit_log.type.${data.type}`, [data])}`,
 						fields,
 						author: {
-							url: `https://www.voxelified.com/user/${author.data.username}`,
+							url: `https://hakumi.cafe/user/${author.data.username}`,
 							name: authorName,
 							icon_url: author.data.avatar_url
 						},

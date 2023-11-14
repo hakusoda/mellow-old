@@ -37,7 +37,7 @@ export default command(({ t, token, guild_id }, { target }) => defer(token, asyn
 
 		return editOriginalResponse(token, {
 			embeds: [{
-				url: `https://www.voxelified.com/user/${user.username}`,
+				url: `https://hakumi.cafe/user/${user.username}`,
 				title: `${user.name ?? user.username} (@${user.username})`,
 				fields,
 				footer: {
@@ -63,7 +63,7 @@ export default command(({ t, token, guild_id }, { target }) => defer(token, asyn
 		name: 'target',
 		type: DiscordApplicationCommandOptionType.User,
 		required: true,
-		description: 'Select a member to request the Voxelified Profile of.'
+		description: 'Select a member you wish to view the HAKUMI profile of.'
 	}] as const,
 	defaultMemberPermissions: '0'
 });

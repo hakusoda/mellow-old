@@ -33,7 +33,7 @@ export default command(({ t, token, locale, member, guild_id }) => defer(token, 
 		components: [{
 			type: 1,
 			components: [{
-				url: 'https://discord.com/api/oauth2/authorize?client_id=1068554282481229885&redirect_uri=https%3A%2F%2Fapi.voxelified.com%2Fv1%2Fauth%2Fcallback%2F0&response_type=code&scope=identify&state=roblox',
+				url: 'https://discord.com/api/oauth2/authorize?client_id=1068554282481229885&redirect_uri=https%3A%2F%2Fapi.hakumi.cafe%2Fv1%2Fauth%2Fcallback%2F0&response_type=code&scope=identify&state=roblox',
 				type: 2,
 				style: 5,
 				label: t('common:action.continue')
@@ -61,7 +61,7 @@ export async function verify(t: TranslateFn, executor: DiscordMember | null, ser
 			components: [{
 				type: 1,
 				components: [{
-					url: 'https://discord.com/api/oauth2/authorize?client_id=1068554282481229885&redirect_uri=https%3A%2F%2Fapi.voxelified.com%2Fv1%2Fauth%2Fcallback%2F0&response_type=code&scope=identify&state=roblox',
+					url: 'https://discord.com/api/oauth2/authorize?client_id=1068554282481229885&redirect_uri=https%3A%2F%2Fapi.hakumi.cafe%2Fv1%2Fauth%2Fcallback%2F0&response_type=code&scope=identify&state=roblox',
 					type: 2,
 					style: 5,
 					label: t('common:action.continue')

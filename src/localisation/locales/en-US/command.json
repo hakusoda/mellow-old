@@ -30,7 +30,7 @@
 
 	"forcesync": "forcesync",
 	"forcesync.summary": "Forcefully sync someone's server profile.",
-	"forcesync.disabled": "## Cannot Sync Profile(s)\nSorry, forceful syncing has been disabled in this server, if you manage this server, enable it [here](https://www.voxelified.com/mellow/server/{{0.id}}/settings/syncing/settings).",
+	"forcesync.disabled": "## Cannot Sync Profile(s)\nSorry, forceful syncing has been disabled in this server, if you manage this server, enable it [here](https://hakumi.cafe/mellow/server/{{0.id}}/settings/syncing/settings).",
 
 	"forcesyncall": "forcesyncall",
 	"forcesyncall.summary": "Forcefully sync the profiles of everyone in this server.",
@@ -40,9 +40,9 @@
 
 	"setup": "setup",
 	"setup.summary": "Connect this Discord Server to mellow.",
-	"setup.signup": "## Account required\nBefore you can continue, you need to [sign-up](https://www.voxelified.com/sign-up) for a HAKUMI Account.\nAfter that, if you did not sign-up with Discord, please connect your account [here](https://www.voxelified.com/settings/account/connections).\nExecute this command again after completing these instructions.",
-	"setup.exists": "## Server already connected\nThis server is already connected to mellow, view it [here](https://www.voxelified.com/mellow/server/{{0}}/settings).",
-	"setup.done": "## Server connected\nThis server is now connected to mellow!\nConfigure it online [here](https://www.voxelified.com/mellow/server/{{0}}/settings).",
+	"setup.signup": "## Account required\nBefore you can continue, you need to [sign-up](https://hakumi.cafe/sign-up) for a HAKUMI Account.\nAfter that, if you did not sign-up with Discord, please connect your account [here](https://hakumi.cafe/settings/account/connections).\nExecute this command again after completing these instructions.",
+	"setup.exists": "## Server already connected\nThis server is already connected to mellow, view it [here](https://hakumi.cafe/mellow/server/{{0}}/settings).",
+	"setup.done": "## Server connected\nThis server is now connected to mellow!\nConfigure it online [here](https://hakumi.cafe/mellow/server/{{0}}/settings).",
 
 	"whois": "profile",
 	"whois.summary": "Request someone's HAKUMI Profile.",
@@ -56,7 +56,7 @@
 
 	"error.unknown": "An unknown internal error occurred.",
 	"error.database": "An unexpected error occurred while accessing our database, please try again later.",
-	"error.maintenance": "# Service Unavailable\nSorry, mellow is currently unavailable and under maintenace, keep an eye on our [service status](https://status.voxelified.com), and try again later!",
+	"error.maintenance": "# Service Unavailable\nSorry, mellow is currently unavailable and under maintenace, keep an eye on our [service status](https://status.hakumi.cafe), and try again later!",
 	"error.no_permission": "you are not cool enough 🦑",
 	"error.invalid_request": "invalid request received from discord"
 }
