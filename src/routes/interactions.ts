@@ -47,7 +47,7 @@ export default async (request: Request) => {
 			const guildId = (payload.data as any).guild_id;
 			if (guildId) {
 				return json(defer(payload.token, async () => {
-					const { data, error } = await supabase.from('mellow_server_commands').select('id, name, actions:mellow_server_command_actions ( id, type, data, position, created_at, parent_id, parent_type )').eq('name', payload.data.name).eq('server_id', guildId).limit(1).single();
+					const { data, error } = await supabase.from('mellow_server_commands').select('id, name, actions:mellow_server_command_actions ( id, type, data, position, parent_id, parent_type )').eq('name', payload.data.name).eq('server_id', guildId).limit(1).single();
 					if (error) {
 						console.error(error);
 						return editOriginalResponse(payload.token, { content: 'command error ow!!!' });

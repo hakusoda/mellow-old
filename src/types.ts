@@ -40,7 +40,6 @@ export type MellowProfileSyncAction = {
 	id: string
 	name: string
 	metadata: {}
-	created_at: string
 	requirements: {
 		id: string
 		data: string[]
@@ -107,7 +106,6 @@ export interface CustomCommandAction {
 	type: CustomCommandActionType
 	position: number
 	parent_id: string | null
-	created_at: string
 	parent_type: CustomCommandActionParentType | null
 }
 

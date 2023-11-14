@@ -36,7 +36,7 @@ export async function getUserByDiscordId(userId: string) {
 
 export async function getUsersByDiscordId(userIds: string[]) {
 	const { data, error } = await supabase.from('user_connections')
-		.select('sub, user:users ( id, bio, name, flags, username, created_at, avatar_url, roblox_oauth_tokens:mellow_roblox_oauth_tokens ( expires_in, created_at, access_token, refresh_token ) )')
+		.select('sub, user:users ( id, bio, name, flags, username, created_at, avatar_url )')
 		.in('sub', userIds);
 	if (error)
 		console.error(error);
@@ -45,7 +45,7 @@ export async function getUsersByDiscordId(userIds: string[]) {
 
 export async function getServerProfileSyncingActions(serverId: string): Promise<MellowProfileSyncAction[]> {
 	const { data, error } = await supabase.from('mellow_binds')
-		.select<string, any>('id, name, type, metadata, created_at, requirements_type, requirements:mellow_bind_requirements ( id, type, data )')
+		.select<string, any>('id, name, type, metadata, requirements_type, requirements:mellow_bind_requirements ( id, type, data )')
 		.eq('server_id', serverId);
 	if (error)
 		console.error(error);
