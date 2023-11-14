@@ -4,7 +4,7 @@ import type { Log } from './types.ts';
 import { supabase } from './database.ts';
 import { hasFlag, splitArray } from './util/mod.ts';
 import { createChannelMessage } from './discord.ts';
-import { MellowServerLogType, MellowServerAuditLogType } from './enums.ts';
+import { RoleChangeType, MellowServerLogType, MellowServerAuditLogType } from './enums.ts';
 const mapLogTypes = (old: number, now: number, t: (key: string) => string) =>
 	Object.values(MellowServerLogType).filter(i => typeof i === 'number' && i && hasFlag(old, i) && !hasFlag(now, i)).map(i => t(`mellow_server_logging_type.${i as MellowServerLogType}`));
 
@@ -45,12 +45,12 @@ export async function sendLogs(logs: Log[], serverId: string) {
 								value: `\`\`\`diff\n- ${data.data.type[0]}\n+ ${data.data.type[1]}\`\`\``,
 								inline: true
 							});
-						if (data.data.requirements)
+						/*if (data.data.requirements)
 							fields.push({
 								name: t('server_audit_log.type.4.requirements'),
 								value: `${data.data.requirements} Requirements`,
 								inline: true
-							});
+							});*/
 						if (data.data.requirements_type[1])
 							fields.push({
 								name: t('server_audit_log.type.4.requirements_type'),
@@ -94,7 +94,6 @@ export async function sendLogs(logs: Log[], serverId: string) {
 						description
 					});
 				} else if (type === MellowServerLogType.ServerProfileSync) {
-					const rolesChanged = data.addedRoles.length || data.removedRoles.length;
 					const [oldNick, newNick] = data.nickname;
 
 					const nickChanged = oldNick !== newNick;
@@ -105,12 +104,15 @@ export async function sendLogs(logs: Log[], serverId: string) {
 						title = `${data.member.user.global_name} ${t('command:sync.complete.removed2')}`;
 						description = t('command:sync.complete.removed') + t(`command:sync.complete.removed.${data.banned ? 0 : 1}`);
 					}
+
+					const addedRoles = data.role_changes.filter(item => item.type === RoleChangeType.Added);
+					const removedRoles = data.role_changes.filter(item => item.type === RoleChangeType.Removed);
 					embeds.push({
 						title,
 						fields: [
-							...rolesChanged ? [{
+							...data.role_changes.length ? [{
 								name: t('command:sync.complete.embed.roles'),
-								value: `\`\`\`diff\n${[...data.removedRoles.map(r => '- ' + r.name), ...data.addedRoles.map(r => '+ ' + r.name)].join('\n')}\`\`\``,
+								value: `\`\`\`diff\n${[...removedRoles.map(r => '- ' + r.display_name), ...addedRoles.map(r => '+ ' + r.display_name)].join('\n')}\`\`\``,
 								inline: true
 							}] : [],
 							...nickChanged ? [{

@@ -83,7 +83,7 @@ export async function verify(t: TranslateFn, executor: DiscordMember | null, ser
 		nicknameChanged
 	 } = await syncMember(executor, server, serverLinks, discordServer, user, member, ruser, position);
 
-	const profileChanged = roleChanges.length || nicknameChanged;
+	const profileChanged = !!roleChanges.length || nicknameChanged;
 	if (profileChanged || banned || kicked) {
 		await sendLogs([[MellowServerLogType.ServerProfileSync, {
 			banned,

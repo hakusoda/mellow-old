@@ -34,7 +34,7 @@
 
 	"forcesyncall": "forcesyncall",
 	"forcesyncall.summary": "Forcefully sync the profiles of everyone in this server.",
-	"forcesyncall.result": "## Successfully synced {{0}} Server Profiles",
+	"forcesyncall.result": "## Successfully synced {{0}} server profiles",
 	"forcesyncall.result.other": "\nUnfortunately {{0}} other people couldn't be synced, perhaps they aren't connected to mellow...",
 	"forcesyncall.server_too_big": "Server-wide force syncing is not available for this server, as mellow currently doesn't support member counts above 100.",
 
