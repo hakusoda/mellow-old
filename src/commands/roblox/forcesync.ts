@@ -1,10 +1,8 @@
+import { verify } from './sync.ts';
 import { command } from '../mod.ts';
 import { defer, content } from '../response.ts';
 import { editOriginalResponse } from '../../discord.ts';
-
-import { verify } from './sync.ts';
-import { getServer } from '../../database.ts';
-import { getUserByDiscordId } from '../../database.ts';
+import { getServer, getUserByDiscordId } from '../../database.ts';
 import { DiscordMessageFlag, DiscordApplicationCommandOptionType } from '../../enums.ts';
 export default command(({ t, token, member, guild_id }, { target, as }) => defer(token, async () => {
 	const server = await getServer(guild_id);

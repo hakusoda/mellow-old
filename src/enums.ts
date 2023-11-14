@@ -2,6 +2,13 @@ export enum GlobalState {
 	Active,
 	Maintenance
 }
+
+export enum UserConnectionType {
+	Discord,
+	GitHub,
+	Roblox
+}
+
 export enum MellowProfileSyncActionType {
 	GiveRoles,
 	BanFromServer,
@@ -45,6 +52,22 @@ export enum MellowServerLogType {
 export enum MellowServerAuditLogActionType {
 	None,
 	RobloxServerProfileSync = 1 << 0
+}
+
+export enum MellowWebhookPayloadType {
+	Ping,
+	ServerProfilesSynced
+}
+
+export enum WebhookSyncedEventItemState {
+	None,
+	BannedFromServer,
+	KickedFromServer
+}
+
+export enum RoleChangeType {
+	Added,
+	Removed
 }
 
 export enum RobloxLinkFlag {

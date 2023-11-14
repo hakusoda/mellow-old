@@ -1,16 +1,14 @@
 import { ROBLOX_API } from '@hakumi/roblox-api';
 
 import { command } from '../mod.ts';
-import { defer, content } from '../response.ts';
-import { editOriginalResponse } from '../../discord.ts';
-
 import { sendLogs } from '../../logging.ts';
 import { syncMember } from '../../roblox.ts';
-import { supabase, getServer } from '../../database.ts';
-import { getDiscordServer, getMemberPosition } from '../../discord.ts';
-import { DiscordMessageFlag, MellowServerLogType } from '../../enums.ts';
-import { getUserByDiscordId, getServerProfileSyncingActions } from '../../database.ts';
+import { defer, content } from '../response.ts';
+import { sendSyncedWebhookEvent } from '../../syncing.ts';
+import { getDiscordServer, getMemberPosition, editOriginalResponse } from '../../discord.ts';
 import type { User, TranslateFn, MellowServer, DiscordMember, RobloxProfile } from '../../types.ts';
+import { supabase, getServer, getUserByDiscordId, getServerProfileSyncingActions } from '../../database.ts';
+import { RoleChangeType, UserConnectionType, DiscordMessageFlag, MellowServerLogType, WebhookSyncedEventItemState } from '../../enums.ts';
 export default command(({ t, token, locale, member, guild_id }) => defer(token, async () => {
 	const server = await getServer(guild_id);
 	if (!server)
@@ -79,34 +77,44 @@ export async function verify(t: TranslateFn, executor: DiscordMember | null, ser
 	const {
 		banned,
 		kicked,
-		addedRoles,
-		removedRoles,
-		rolesChanged,
+		roleChanges,
 
 		newNickname,
 		nicknameChanged
 	 } = await syncMember(executor, server, serverLinks, discordServer, user, member, ruser, position);
 
-	const profileChanged = rolesChanged || nicknameChanged;
-	if (profileChanged || banned || kicked)
+	const profileChanged = roleChanges.length || nicknameChanged;
+	if (profileChanged || banned || kicked) {
 		await sendLogs([[MellowServerLogType.ServerProfileSync, {
 			banned,
 			kicked,
 			member,
-			roblox: ruser,
 			nickname: [member.nick, newNickname],
 			forced_by: executor,
-			addedRoles,
-			removedRoles
+			role_changes: roleChanges
 		}]], discordServer.id);
+		await sendSyncedWebhookEvent(server, [{
+			state: banned ? WebhookSyncedEventItemState.BannedFromServer : kicked ? WebhookSyncedEventItemState.KickedFromServer : WebhookSyncedEventItemState.None,
+			forced_by: executor ? { id: executor.user.id } : undefined,
+			role_changes: roleChanges,
+			discord_member_id: member.user.id,
+			discord_server_id: serverId,
+			relevant_user_connections: [{
+				sub: robloxId.toString(),
+				type: UserConnectionType.Roblox
+			}]
+		}]);
+	}
 
 	const removed = banned || kicked;
+	const addedRoles = roleChanges.filter(item => item.type === RoleChangeType.Added);
+	const removedRoles = roleChanges.filter(item => item.type === RoleChangeType.Removed);
 	return editOriginalResponse(token, {
 		embeds: profileChanged ? [{
 			fields: [
-				...rolesChanged ? [{
+				...roleChanges.length ? [{
 					name: t('sync.complete.embed.roles'),
-					value: `\`\`\`diff\n${[...removedRoles.map(r => '- ' + r.name), ...addedRoles.map(r => '+ ' + r.name)].join('\n')}\`\`\``,
+					value: `\`\`\`diff\n${[...removedRoles.map(r => '- ' + r.display_name), ...addedRoles.map(r => '+ ' + r.display_name)].join('\n')}\`\`\``,
 					inline: true
 				}] : [],
 				...nicknameChanged ? [{
@@ -116,7 +124,7 @@ export async function verify(t: TranslateFn, executor: DiscordMember | null, ser
 				}] : []
 			]
 		}] : [],
-		content: removed ? t('sync.complete.removed') + t(`sync.complete.removed.${banned ? 0 : 1}`) : t(`sync.complete.${profileChanged}`) + (rolesChanged ? nicknameChanged ? t('sync.complete.true.2') : t('sync.complete.true.0') : nicknameChanged ? t('sync.complete.true.1') : ''),
+		content: removed ? t('sync.complete.removed') + t(`sync.complete.removed.${banned ? 0 : 1}`) : t(`sync.complete.${profileChanged}`) + (roleChanges.length ? nicknameChanged ? t('sync.complete.true.2') : t('sync.complete.true.0') : nicknameChanged ? t('sync.complete.true.1') : ''),
 		components: []
 	});
 }

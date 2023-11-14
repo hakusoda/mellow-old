@@ -1,17 +1,15 @@
 import { ROBLOX_API } from '@hakumi/roblox-api';
 
 import { command } from '../mod.ts';
-import { defer, content } from '../response.ts';
-import { editOriginalResponse } from '../../discord.ts';
-
 import { sendLogs } from '../../logging.ts';
 import { syncMember } from '../../roblox.ts';
+import { defer, content } from '../response.ts';
 import { DISCORD_APP_ID } from '../../util/constants.ts';
-import { supabase, getServer } from '../../database.ts';
-import type { Log, RobloxProfile } from '../../types.ts';
-import { DiscordMessageFlag, MellowServerLogType } from '../../enums.ts';
-import { getUsersByDiscordId, getServerProfileSyncingActions } from '../../database.ts';
-import { getDiscordServer, getServerMembers, getMemberPosition } from '../../discord.ts';
+import { sendSyncedWebhookEvent } from '../../syncing.ts';
+import type { Log, RobloxProfile, WebhookSyncedEventItem } from '../../types.ts';
+import { DiscordMessageFlag, MellowServerLogType, WebhookSyncedEventItemState } from '../../enums.ts';
+import { supabase, getServer, getUsersByDiscordId, getServerProfileSyncingActions } from '../../database.ts';
+import { getDiscordServer, getServerMembers, getMemberPosition, editOriginalResponse } from '../../discord.ts';
 export default command(({ t, token, member, guild_id }) => defer(token, async () => {
 	const server = await getServer(guild_id);
 	if (!server)
@@ -27,7 +25,7 @@ export default command(({ t, token, member, guild_id }) => defer(token, async ()
 
 	const users = await getUsersByDiscordId(members.map(member => member.user.id));
 	const links = await supabase.from('users')
-		.select('user_connections ( sub, user_id )')
+		.select('user_connections ( sub, type, user_id )')
 		.in('id', users.map(user => user.id))
 		.eq('user_connections.type', 2)
 		.then(response => {
@@ -45,6 +43,7 @@ export default command(({ t, token, member, guild_id }) => defer(token, async ()
 		throw new Error();
 
 	const syncLogs: Log[] = [];
+	const webhookEventItems: WebhookSyncedEventItem[] = [];
 	const mellowPosition = getMemberPosition(discordServer, mellow);
 	for (const target of members) {
 		const user = users.find(user => user.sub === target.user.id);
@@ -53,25 +52,33 @@ export default command(({ t, token, member, guild_id }) => defer(token, async ()
 		const {
 			banned,
 			kicked,
-			addedRoles,
-			removedRoles,
-			rolesChanged,
+			roleChanges,
 	
 			newNickname,
 			nicknameChanged
 		} = await syncMember(member, server, serverLinks, discordServer, user, target, robloxUser, mellowPosition);
-		const profileChanged = rolesChanged || nicknameChanged;
-		if (profileChanged || banned || kicked)
+		const profileChanged = roleChanges.length || nicknameChanged;
+		if (profileChanged || banned || kicked) {
 			syncLogs.push([MellowServerLogType.ServerProfileSync, {
 				banned,
 				kicked,
 				member: target,
-				roblox: robloxUser,
 				nickname: [target.nick, newNickname],
 				forced_by: member,
-				addedRoles,
-				removedRoles
+				role_changes: roleChanges
 			}]);
+			webhookEventItems.push({
+				state: banned ? WebhookSyncedEventItemState.BannedFromServer : kicked ? WebhookSyncedEventItemState.KickedFromServer : WebhookSyncedEventItemState.None,
+				forced_by: { id: member!.user.id },
+				role_changes: roleChanges,
+				discord_member_id: target.user.id,
+				discord_server_id: guild_id,
+				relevant_user_connections: links.filter(item => item.user_id == target.user.id).map(item => ({
+					sub: item.sub,
+					type: item.type
+				}))
+			});
+		}
 		
 		synced++;
 		await new Promise(resolve => setTimeout(resolve, 500));
@@ -79,6 +86,7 @@ export default command(({ t, token, member, guild_id }) => defer(token, async ()
 
 	if (syncLogs.length)
 		await sendLogs(syncLogs, guild_id);
+	await sendSyncedWebhookEvent(server, webhookEventItems);
 
 	const other = members.length - synced;
 	return editOriginalResponse(token, content(`${t('forcesyncall.result', [synced])}${other ? t('forcesyncall.result.other', [other]) : ''}`));

@@ -1,13 +1,11 @@
-import { ROBLOX_API } from '@hakumi/roblox-api';
 import type { InventoryItem } from '@voxelified/roblox-open-cloud';
 import { OpenCloudClient, OpenCloudApiKey } from '@voxelified/roblox-open-cloud';
 
-import { hasFlag } from './util/mod.ts';
 import { notifyMemberOfRemoval } from './syncing.ts';
 import { ROBLOX_OPEN_CLOUD_API_KEY } from './util/constants.ts';
 import { banMember, kickMember, modifyMember, getMemberPosition } from './discord.ts';
-import { MellowProfileSyncActionRequirementType, MellowProfileSyncActionRequirementsType, MellowProfileSyncActionType, MellowServerAuditLogActionType } from './enums.ts';
-import type { User, DiscordRole, MellowServer, DiscordGuild, DiscordMember, RobloxProfile, RobloxUserRolesResponse, MellowProfileSyncAction, RobloxServerProfileSyncResult } from './types.ts';
+import type { User, RoleChange, MellowServer, DiscordGuild, DiscordMember, RobloxProfile, RobloxUserRolesResponse, MellowProfileSyncAction, RobloxServerProfileSyncResult } from './types.ts';
+import { RoleChangeType, MellowProfileSyncActionRequirementType, MellowProfileSyncActionRequirementsType, MellowProfileSyncActionType, MellowServerAuditLogActionType } from './enums.ts';
 
 const openCloud = new OpenCloudClient(new OpenCloudApiKey(ROBLOX_OPEN_CLOUD_API_KEY));
 export function getRobloxUserRoles(userId: string | number) {
@@ -20,11 +18,9 @@ export function getRobloxUserRoles(userId: string | number) {
 export async function syncMember(executor: DiscordMember | null, server: MellowServer, syncActions: MellowProfileSyncAction[], discordServer: DiscordGuild, user: User | undefined, member: DiscordMember, robloxUser: RobloxProfile | undefined, mellowPosition: number): Promise<RobloxServerProfileSyncResult> {
 	let roles = [...member.roles];
 	let nickname = member.nick;
-	let rolesChanged = false;
 
 	const position = getMemberPosition(discordServer, member);
-	const addedRoles: DiscordRole[] = [];
-	const removedRoles: DiscordRole[] = [];
+	const roleChanges: RoleChange[] = [];
 
 	const { default_nickname } = server;
 	if (default_nickname && robloxUser)
@@ -66,16 +62,22 @@ export async function syncMember(executor: DiscordMember | null, server: MellowS
 				if (!metadata.items.every(id => member!.roles.includes(id))) {
 					const filtered = metadata.items.filter(id => !member!.roles.includes(id));
 					roles.push(...filtered);
-					addedRoles.push(...filtered.map(r => discordServer.roles.find(j => j.id === r)!));
-					rolesChanged = true;
+					roleChanges.push(...filtered.map(target_id => ({
+						type: RoleChangeType.Added,
+						target_id,
+						display_name: discordServer.roles.find(item => item.id === target_id)?.name!
+					})));
 				}
 			} else {
 				const filtered = roles.filter(id => !metadata.items.includes(id));
 				if (metadata.can_remove && !roles.every(id => filtered.includes(id))) {
 					const filtered2 = metadata.items.filter(id => roles.includes(id));
 					roles = filtered;
-					removedRoles.push(...filtered2.map(r => discordServer.roles.find(j => j.id === r)!));
-					rolesChanged = true;
+					roleChanges.push(...filtered2.map(target_id => ({
+						type: RoleChangeType.Removed,
+						target_id,
+						display_name: discordServer.roles.find(item => item.id === target_id)?.name!
+					})));
 				}
 			}
 		} else if (type === MellowProfileSyncActionType.BanFromServer) {
@@ -94,44 +96,20 @@ export async function syncMember(executor: DiscordMember | null, server: MellowS
 	}
 
 	const nickChanged = position <= mellowPosition && member.user.id !== discordServer.owner_id && nickname !== member.nick;
-	if (!removed && (rolesChanged || nickChanged))
+	if (!removed && (roleChanges.length || nickChanged))
 		await modifyMember(server.id, member.user.id, {
 			nick: nickChanged ? nickname?.slice(0, 32) : undefined,
 			roles
 		}, executor ? `Forcefully synced by ${executor.user.global_name} (@${executor.user.username})` : 'Roblox Server Profile Sync');
-	
-	for (const webhook of server.webhooks)
-		if (webhook.enabled && hasFlag(webhook.events, MellowServerAuditLogActionType.RobloxServerProfileSync))
-			await fetch(webhook.target_url, {
-				body: JSON.stringify({
-					type: 1,
-					data: {
-						guild_id: discordServer.id,
-						member_id: member.user.id,
-						roblox_id: robloxUser?.userId ?? null,
-						forced_by: executor ? {
-							id: executor.user.id
-						} : null,
-						added_roles: removed ? [] : addedRoles.filter(i => i).map(mapRoleForWebhook),
-						removed_roles: removed ? [] : removedRoles.filter(i => i).map(mapRoleForWebhook)
-					}
-				}),
-				method: webhook.request_method,
-				headers: webhook.request_headers
-			});
 
 	return {
 		banned,
 		kicked,
-		addedRoles: removed ? [] : addedRoles.filter(i => i),
+		roleChanges,
 		newNickname: nickname,
-		removedRoles: removed ? [] : removedRoles.filter(i => i),
-		rolesChanged: rolesChanged && !removed,
 		nicknameChanged: nickChanged && !removed
 	};
 }
-
-const mapRoleForWebhook = (role: DiscordRole) => ({ id: role.id, name: role.id });
 
 async function meetsActionRequirements(user: User | undefined, { requirements, requirements_type }: MellowProfileSyncAction, robloxRoles: RobloxUserRolesResponse['data'], requirementsCache: Record<string, boolean>, metTypeLinks: MellowProfileSyncAction[], robloxInventoryItems: InventoryItem[], robloxUser?: RobloxProfile) {
 	const requiresOne = requirements_type === MellowProfileSyncActionRequirementsType.MeetOne;

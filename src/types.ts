@@ -1,4 +1,4 @@
-import type { MellowProfileSyncActionType, DiscordChannelType, MellowServerLogType, DiscordInteractionType, CustomCommandActionType, MellowServerAuditLogType, MellowProfileSyncActionRequirementType, MellowProfileSyncActionRequirementsType, CustomCommandActionParentType, DiscordApplicationCommandOptionType } from './enums.ts';
+import type { RoleChangeType, DiscordChannelType, UserConnectionType, MellowServerLogType, DiscordInteractionType, CustomCommandActionType, MellowServerAuditLogType, WebhookSyncedEventItemState, MellowProfileSyncActionType, MellowProfileSyncActionRequirementType, MellowProfileSyncActionRequirementsType, CustomCommandActionParentType, DiscordApplicationCommandOptionType } from './enums.ts';
 export interface RobloxLink {
 	id: string
 	owner: string
@@ -73,6 +73,28 @@ export interface MellowRemoveMemberMetadata {
 	user_facing_reason: string | null
 }
 
+export interface WebhookSyncedEventItem {
+	state: WebhookSyncedEventItemState
+	forced_by?: {
+		id: string
+	}
+	role_changes: RoleChange[]
+	discord_member_id: string
+	discord_server_id: string
+	relevant_user_connections: RelevantUserConnection[]
+}
+
+export interface RoleChange {
+	type: RoleChangeType
+	target_id: string
+	display_name: string
+}
+
+export interface RelevantUserConnection {
+	sub: string
+	type: UserConnectionType
+}
+
 export interface CustomCommand {
 	id: string
 	name: string
@@ -92,9 +114,7 @@ export interface CustomCommandAction {
 export interface RobloxServerProfileSyncResult {
 	banned: boolean
 	kicked: boolean
-	addedRoles: DiscordRole[]
-	rolesChanged: boolean
-	removedRoles: DiscordRole[]
+	roleChanges: RoleChange[]
 
 	newNickname: string | null
 	nicknameChanged: boolean
@@ -113,11 +133,9 @@ type ServerProfileSyncLog = [MellowServerLogType.ServerProfileSync, {
 	banned: boolean
 	kicked: boolean
 	member: DiscordMember
-	roblox?: RobloxProfile
 	nickname: [string | null, string | null]
 	forced_by: DiscordMember | null
-	addedRoles: DiscordRole[]
-	removedRoles: DiscordRole[]
+	role_changes: RoleChange[]
 }]
 
 export type Log = AuditLogLog | ServerProfileSyncLog
