@@ -9,7 +9,7 @@ import type { DiscordInteraction, CommandExecutePayload, DiscordApplicationComma
 
 import { setup } from './other/mod.ts';
 import { ping, roll, whois, pokemon } from './general/mod.ts';
-import { sync, forcesync, forcesyncall } from './roblox/mod.ts';
+import { sync, forcesync, forcesyncall } from './syncing/mod.ts';
 export const commands: Record<string, Command<any>> = {
 	ping,
 	roll,

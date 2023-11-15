@@ -5,6 +5,7 @@ import { sendLogs } from '../../logging.ts';
 import { syncMember } from '../../roblox.ts';
 import { defer, content } from '../response.ts';
 import { sendSyncedWebhookEvent } from '../../syncing.ts';
+import { MELLOW_SYNC_REQUIREMENT_CONNECTIONS } from '../../constants.ts';
 import { getDiscordServer, getMemberPosition, editOriginalResponse } from '../../discord.ts';
 import type { User, TranslateFn, MellowServer, DiscordMember, RobloxProfile } from '../../types.ts';
 import { supabase, getServer, getUserByDiscordId, getServerProfileSyncingActions } from '../../database.ts';
@@ -29,47 +30,33 @@ export default command(({ t, token, locale, member, guild_id }) => defer(token, 
 	});
 	return editOriginalResponse(token, {
 		flags: DiscordMessageFlag.Ephemeral,
-		content: t('sync.signup'),
-		components: [{
-			type: 1,
-			components: [{
-				url: 'https://discord.com/api/oauth2/authorize?client_id=1068554282481229885&redirect_uri=https%3A%2F%2Fapi.hakumi.cafe%2Fv1%2Fauth%2Fcallback%2F0&response_type=code&scope=identify&state=roblox',
-				type: 2,
-				style: 5,
-				label: t('common:action.continue')
-			}]
-		}]
+		content: t('sync.signup', ['TODO', guild_id])
 	});
 }, DiscordMessageFlag.Ephemeral));
 
-export async function verify(t: TranslateFn, executor: DiscordMember | null, server: MellowServer, token: string, serverId: string, user: User | undefined, member: DiscordMember, syncAs?: number) {
-	const userBind = user ? await supabase.from('users')
-		.select('user_connections ( sub )')
+export async function verify(t: TranslateFn, executor: DiscordMember | null, server: MellowServer, token: string, serverId: string, user: User | undefined, member: DiscordMember) {
+	const userConnections = user ? await supabase.from('users')
+		.select<string, {
+			connections: {
+				connection: {
+					sub: string
+					type: UserConnectionType
+				}
+			}[]
+		}>('connections:mellow_user_server_connections ( connection:user_connections ( sub, type ) )')
 		.eq('id', user.id)
-		.eq('user_connections.type', 2)
 		.limit(1)
 		.maybeSingle()
 		.then(response => {
 			if (response.error)
 				console.error(response.error);
-			return response.data?.user_connections[0];
+			if (!response.data)
+				return [];
+			return response.data?.connections.map(item => item.connection);
 		})
-	: null;
-	if (!userBind)
-		return editOriginalResponse(token, {
-			content: t('sync.signup'),
-			components: [{
-				type: 1,
-				components: [{
-					url: 'https://discord.com/api/oauth2/authorize?client_id=1068554282481229885&redirect_uri=https%3A%2F%2Fapi.hakumi.cafe%2Fv1%2Fauth%2Fcallback%2F0&response_type=code&scope=identify&state=roblox',
-					type: 2,
-					style: 5,
-					label: t('common:action.continue')
-				}]
-			}]
-		});
+	: [];
 
-	const robloxId = syncAs ?? userBind?.sub as string;
+	const robloxId = userConnections?.find(item => item.type === UserConnectionType.Roblox)?.sub;
 	const [ruser]: RobloxProfile[] = robloxId ? await ROBLOX_API.users.getProfiles([robloxId], ['names.username', 'names.combinedName']) : [undefined];
 	const serverLinks = await getServerProfileSyncingActions(serverId);
 	const discordServer = (await getDiscordServer(serverId))!;
@@ -99,16 +86,15 @@ export async function verify(t: TranslateFn, executor: DiscordMember | null, ser
 			role_changes: roleChanges,
 			discord_member_id: member.user.id,
 			discord_server_id: serverId,
-			relevant_user_connections: [{
-				sub: robloxId.toString(),
-				type: UserConnectionType.Roblox
-			}]
+			relevant_user_connections: userConnections
 		}]);
 	}
 
 	const removed = banned || kicked;
 	const addedRoles = roleChanges.filter(item => item.type === RoleChangeType.Added);
 	const removedRoles = roleChanges.filter(item => item.type === RoleChangeType.Removed);
+
+	const actionConnections = [...new Set(serverLinks.map(item => item.requirements.map(item => MELLOW_SYNC_REQUIREMENT_CONNECTIONS[item.type]!).filter(i => i)).flat())];
 	return editOriginalResponse(token, {
 		embeds: profileChanged ? [{
 			fields: [
@@ -124,7 +110,7 @@ export async function verify(t: TranslateFn, executor: DiscordMember | null, ser
 				}] : []
 			]
 		}] : [],
-		content: removed ? t('sync.complete.removed') + t(`sync.complete.removed.${banned ? 0 : 1}`) : t(`sync.complete.${profileChanged}`) + (roleChanges.length ? nicknameChanged ? t('sync.complete.true.2') : t('sync.complete.true.0') : nicknameChanged ? t('sync.complete.true.1') : ''),
+		content: removed ? t('sync.complete.removed') + t(`sync.complete.removed.${banned ? 0 : 1}`) : t(`sync.complete.${profileChanged}`) + (roleChanges.length ? nicknameChanged ? t('sync.complete.true.2') : t('sync.complete.true.0') : nicknameChanged ? t('sync.complete.true.1') : '') + (userConnections.length >= actionConnections.length ? '' : t('sync.complete.missing_connections', [serverId])),
 		components: []
 	});
 }

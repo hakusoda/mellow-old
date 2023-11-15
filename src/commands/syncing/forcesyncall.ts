@@ -7,9 +7,9 @@ import { defer, content } from '../response.ts';
 import { DISCORD_APP_ID } from '../../util/constants.ts';
 import { sendSyncedWebhookEvent } from '../../syncing.ts';
 import type { Log, RobloxProfile, WebhookSyncedEventItem } from '../../types.ts';
-import { DiscordMessageFlag, MellowServerLogType, WebhookSyncedEventItemState } from '../../enums.ts';
 import { supabase, getServer, getUsersByDiscordId, getServerProfileSyncingActions } from '../../database.ts';
 import { getDiscordServer, getServerMembers, getMemberPosition, editOriginalResponse } from '../../discord.ts';
+import { DiscordMessageFlag, UserConnectionType, MellowServerLogType, WebhookSyncedEventItemState } from '../../enums.ts';
 export default command(({ t, token, member, guild_id }) => defer(token, async () => {
 	const server = await getServer(guild_id);
 	if (!server)
@@ -32,13 +32,21 @@ export default command(({ t, token, member, guild_id }) => defer(token, async ()
 
 	const users = await getUsersByDiscordId(members.map(member => member.user.id));
 	const links = await supabase.from('users')
-		.select('user_connections ( sub, type, user_id )')
+		.select<string, {
+			connections: {
+				connection: {
+					sub: string
+					type: UserConnectionType
+					user_id: string
+				}
+			}[]
+		}>('connections:mellow_user_server_connections ( connection:user_connections ( sub, type, user_id ) )')
 		.in('id', users.map(user => user.id))
-		.eq('user_connections.type', 2)
+		.eq('mellow_user_server_connections.user_connections.type', 2)
 		.then(response => {
 			if (response.error)
 				console.error(response.error);
-			return response.data?.map(item => item.user_connections[0]).filter(i => i) ?? [];
+			return response.data?.map(item => item.connections[0]?.connection).filter(i => i) ?? [];
 		});
 
 	const robloxUsers: RobloxProfile[] = await ROBLOX_API.users.getProfiles(links.map(link => link.sub as string), ['names.username', 'names.combinedName']);

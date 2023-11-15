@@ -1,6 +1,6 @@
 import { getFixedT } from 'i18next';
 
-import { verify } from '../commands/roblox/sync.ts';
+import { verify } from '../commands/syncing/sync.ts';
 import { MELLOW_KEY } from '../util/constants.ts';
 import { getServerMember } from '../discord.ts';
 import { getUser, supabase, getServer } from '../database.ts';
@@ -25,9 +25,10 @@ export default async (request: Request) => {
 
 	const t = getFixedT(data.locale, 'command');
 	const server = await getServer(data.server_id);
-	await verify(t, null, server!, data.interaction_token, data.server_id, user, member);
+	await verify(t, null, server!, data.interaction_token, data.server_id, user, member)
+		.catch(console.error);
 
 	await supabase.from('mellow_signups').delete().eq('user_id', discordId);
 
-	return new Response('great!', { status: 200 });
+	return new Response();
 }

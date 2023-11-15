@@ -13,8 +13,8 @@
 	"pokemon.embed.summary": "it is a {{0.types.0.type.name}} type with {{0.abilities.length}} abilities",
 
 	"sync": "sync",
-	"sync.summary": "Sync your Server Profile with your Roblox Account.",
-	"sync.signup": "## Connect Roblox Account\nYou must be new to mellow, click Continue to connect your Roblox Account.\n~~This message will update with your server profile status after you link a Roblox Account.~~\nThe functionality above is currently under maintenance, please execute this command again upon completion.",
+	"sync.summary": "Sync your server profile.",
+	"sync.signup": "## Hello, welcome to the server!\nYou appear to be new to mellow, this server uses mellow to sync member profiles with external services, such as Roblox.\nIf you would like to continue, please continue [here](https://discord.com/api/oauth2/authorize?client_id=1068554282481229885&redirect_uri=https%3A%2F%2Fapi.hakumi.cafe%2Fv1%2Fauth%2Fcallback%2F0&response_type=code&scope=identify&state=mlw{{1}}mlw), don't worry, it shouldn't take long!",
 	"sync.complete.true": "## Server Profile Updated\n",
 	"sync.complete.true.0": "Your roles have been updated.",
 	"sync.complete.true.1": "Your nickname has been updated.",
@@ -26,6 +26,7 @@
 	"sync.complete.removed2": "has been removed from this server",
 	"sync.complete.removed.0": "This member has been banned for meeting the requirements of a ban action.",
 	"sync.complete.removed.1": "This member has been kicked for meeting the requirements of a kick action.",
+	"sync.complete.missing_connections": "\n\n### You're missing connections\nYou haven't given this server access to all connections yet, change that [here](https://hakumi.cafe/mellow/server/{{0}}/onboarding)!",
 	"sync.no_server": "## Cannot Sync Profile\nThis server has not been set-up with mellow yet, ",
 
 	"forcesync": "forcesync",
@@ -42,7 +43,7 @@
 	"setup.summary": "Connect this Discord Server to mellow.",
 	"setup.signup": "## Account required\nBefore you can continue, you need to [sign-up](https://hakumi.cafe/sign-up) for a HAKUMI Account.\nAfter that, if you did not sign-up with Discord, please connect your account [here](https://hakumi.cafe/settings/account/connections).\nExecute this command again after completing these instructions.",
 	"setup.exists": "## Server already connected\nThis server is already connected to mellow, view it [here](https://hakumi.cafe/mellow/server/{{0}}/settings).",
-	"setup.done": "## Server connected\nThis server is now connected to mellow!\nConfigure it online [here](https://hakumi.cafe/mellow/server/{{0}}/settings).",
+	"setup.done": "## Server connected\nThis server is now connected to mellow!\nConfigure it online [here](https://hakumi.cafe/mellow/server/{{0}}/settings).\n\nIf you haven't already, and you plan for me to manage members' roles, you may need to position one of my roles at very top of your server.",
 
 	"whois": "profile",
 	"whois.summary": "Request someone's HAKUMI Profile.",

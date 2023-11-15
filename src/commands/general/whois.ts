@@ -23,12 +23,15 @@ export default command(({ t, token, guild_id }, { target }) => defer(token, asyn
 				value: roles.join(' • ')
 			});
 
-		const robloxLinks = await supabase.from('user_connections')
-			.select('sub')
+		const robloxLinks = await supabase.from('mellow_user_server_connections')
+			.select<string, {
+				connection: { sub: string }
+			}>('connection:user_connections ( sub )')
 			.eq('user_id', user.id)
-			.eq('type', 2);
+			.eq('server_id', guild_id)
+			.eq('user_connections.type', 2);
 		if (robloxLinks.data) {
-			const users = await ROBLOX_API.users.getProfiles(robloxLinks.data.map(i => i.sub), ['names.username', 'names.combinedName']);
+			const users = await ROBLOX_API.users.getProfiles(robloxLinks.data.map(i => i.connection.sub), ['names.username', 'names.combinedName']);
 			fields.push({
 				name: t('whois.roblox'),
 				value: users.map(user => t('whois.roblox.user', [user])).join(' • ')
