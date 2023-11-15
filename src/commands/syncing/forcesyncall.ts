@@ -69,7 +69,7 @@ export default command(({ t, token, member, guild_id }) => defer(token, async ()
 			newNickname,
 			nicknameChanged
 		} = await syncMember(member, server, serverLinks, discordServer, user, target, robloxUser, mellowPosition);
-		const profileChanged = roleChanges.length || nicknameChanged;
+		const profileChanged = !!roleChanges.length || nicknameChanged;
 		if (profileChanged || banned || kicked) {
 			syncLogs.push([MellowServerLogType.ServerProfileSync, {
 				banned,
@@ -91,8 +91,9 @@ export default command(({ t, token, member, guild_id }) => defer(token, async ()
 				}))
 			});
 
-			await new Promise(resolve => setTimeout(resolve, 500));
-		}
+			await new Promise(resolve => setTimeout(resolve, 750));
+		} else
+			await new Promise(resolve => setTimeout(resolve, 100));
 		
 		synced++;
 	}
